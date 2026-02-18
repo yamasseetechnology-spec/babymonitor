@@ -348,7 +348,19 @@ async function startCamera() {
 
   if (peer) { peer.destroy(); peer = null; }
 
-  peer = new Peer({ debug: 0 });
+  peer = new Peer({
+    host: '0.peerjs.com',
+    port: 443,
+    secure: true,
+    debug: 0,
+    config: {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' }
+      ]
+    }
+  });
 
   peer.on('open', (id) => {
     // Show the ID on the video feed — this is what viewer types in
@@ -412,7 +424,19 @@ function startWatching() {
   if (peer) { peer.destroy(); peer=null; }
 
   // Create a viewer peer
-  peer = new Peer({ debug: 0 });
+  peer = new Peer({
+    host: '0.peerjs.com',
+    port: 443,
+    secure: true,
+    debug: 0,
+    config: {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' }
+      ]
+    }
+  });
 
   peer.on('error', (err)=>{
     toast('Could not connect: '+err.type,'error');
@@ -421,9 +445,19 @@ function startWatching() {
     $('placeholder-msg').textContent = 'Connection failed — check the Camera ID';
   });
 
-  peer.on('open', () => {
-    // Call the camera peer ID
-    const call = peer.call(camId, new MediaStream()); // empty stream — viewer receives only
+  peer.on('open', async () => {
+    // Viewer needs a real stream to initiate call — use blank video track
+    let viewerStream;
+    try {
+      // Try to get a silent audio track so WebRTC handshake works properly
+      viewerStream = await navigator.mediaDevices.getUserMedia({ audio:true, video:false });
+    } catch(e) {
+      // Fallback — canvas-generated blank video stream
+      const blankCanvas = document.createElement('canvas');
+      blankCanvas.width=2; blankCanvas.height=2;
+      viewerStream = blankCanvas.captureStream(1);
+    }
+    const call = peer.call(camId, viewerStream);
     activeCall = call;
 
     if (!call) {
