@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Yamassee Smart Monitor</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<!-- PeerJS — free hosted WebRTC signaling, no server needed -->
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-:root {
+:root{
   --gold:#FFD700;--gold-dim:#B8960C;--gold-glow:rgba(255,215,0,0.22);
   --red:#FF3B3B;--red-glow:rgba(255,59,59,0.35);
   --green:#39FF14;--green-glow:rgba(57,255,20,0.3);
@@ -39,21 +41,15 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .rtab.active{background:rgba(255,215,0,0.08);color:var(--gold);border-color:var(--gold-dim);box-shadow:0 0 14px rgba(255,215,0,0.1);}
 .rtab:hover:not(.active){background:var(--s3);color:var(--gold);}
 
-/* VIEWER PANEL */
-#viewer-panel{display:none;flex-direction:column;gap:8px;padding:10px 14px;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
+/* VIEWER CONNECT PANEL */
+#viewer-panel{display:none;align-items:center;gap:8px;padding:10px 14px;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
 #viewer-panel.show{display:flex;}
-#viewer-panel label{font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,215,0,0.5);}
-#active-rooms-list{display:flex;flex-direction:column;gap:6px;}
-.room-card{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;transition:all 0.2s;}
-.room-card:hover{background:var(--s3);border-color:rgba(255,215,0,0.35);}
-.room-card .rc-id{font-family:var(--font-mono);font-size:0.9rem;letter-spacing:0.15em;color:var(--gold);}
-.room-card .rc-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green-glow);display:inline-block;margin-right:5px;}
-.room-card .rc-sub{font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;color:rgba(255,215,0,0.4);margin-top:2px;}
-.rc-watch{padding:6px 16px;font-family:var(--font-ui);font-size:0.82rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid rgba(255,215,0,0.4);border-radius:6px;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
-.rc-watch:hover{background:rgba(255,215,0,0.22);}
-#viewer-status{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;color:rgba(255,215,0,0.35);text-align:center;padding:8px;}
-#refresh-btn{padding:6px 14px;font-family:var(--font-ui);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:var(--s2);color:rgba(255,215,0,0.6);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.2s;align-self:flex-end;}
-#refresh-btn:hover{color:var(--gold);border-color:rgba(255,215,0,0.35);}
+#cam-id-input{flex:1;padding:10px 12px;background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;font-family:var(--font-mono);font-size:1rem;letter-spacing:0.12em;outline:none;text-transform:uppercase;min-width:0;}
+#cam-id-input:focus{border-color:var(--gold-dim);box-shadow:0 0 10px rgba(255,215,0,0.1);}
+#cam-id-input::placeholder{color:rgba(255,215,0,0.2);letter-spacing:0.08em;}
+#watch-btn{padding:0 18px;height:44px;font-family:var(--font-ui);font-size:0.88rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid var(--gold-dim);border-radius:8px;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;box-shadow:0 0 14px var(--gold-glow);}
+#watch-btn:hover{background:rgba(255,215,0,0.2);}
+#watch-btn:disabled{opacity:0.4;cursor:not-allowed;}
 
 /* CAMERA SECTION */
 #cam-section{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 14px 6px;}
@@ -65,35 +61,38 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 #motion-canvas{display:none;position:absolute;inset:0;}
 
 /* PLACEHOLDER */
-#cam-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:20px;background:var(--s1);}
+#cam-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:20px;background:var(--s1);}
 #cam-placeholder svg{opacity:0.15;width:56px;height:56px;}
-#cam-placeholder p{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,215,0,0.3);text-align:center;padding:0 20px;}
+#cam-placeholder p{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,215,0,0.3);text-align:center;padding:0 24px;line-height:1.7;}
 
-/* ROOM ID — center top of video */
-#room-id-overlay{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:none;
-  font-family:'Share Tech Mono',monospace;font-size:1.1rem;font-weight:700;letter-spacing:0.22em;
-  text-transform:uppercase;color:#FFD700;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);
-  padding:7px 20px;border-radius:30px;border:1.5px solid rgba(255,215,0,0.5);
-  box-shadow:0 0 20px rgba(255,215,0,0.25);text-shadow:0 0 12px rgba(255,215,0,0.7);
-  white-space:nowrap;pointer-events:none;}
+/* CAMERA ID — bold center top of video */
+#cam-id-overlay{
+  position:absolute;top:16px;left:50%;transform:translateX(-50%);
+  z-index:20;display:none;
+  font-family:'Share Tech Mono',monospace;font-size:1.15rem;font-weight:700;
+  letter-spacing:0.25em;text-transform:uppercase;color:#FFD700;
+  background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);
+  padding:8px 22px;border-radius:30px;
+  border:1.5px solid rgba(255,215,0,0.55);
+  box-shadow:0 0 24px rgba(255,215,0,0.3);
+  text-shadow:0 0 14px rgba(255,215,0,0.8);
+  white-space:nowrap;pointer-events:none;
+}
 
 /* LIVE badge */
-#live-badge{position:absolute;bottom:14px;left:14px;display:none;align-items:center;gap:6px;
-  background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);border:1px solid rgba(255,59,59,0.45);
-  border-radius:8px;padding:4px 10px;font-family:var(--font-mono);font-size:0.68rem;
-  letter-spacing:0.14em;color:#fff;z-index:6;}
+#live-badge{position:absolute;bottom:14px;left:14px;display:none;align-items:center;gap:6px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);border:1px solid rgba(255,59,59,0.5);border-radius:8px;padding:4px 10px;font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.14em;color:#fff;z-index:6;}
 #live-badge .ldot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 7px var(--red-glow);animation:blink 1.2s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
 
-/* Stats overlay */
+/* Stats */
 #cam-stats{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;z-index:6;pointer-events:none;}
-.stat-chip{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,0.68);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.09em;color:rgba(255,215,0,0.5);}
-.stat-chip.hot{border-color:rgba(255,59,59,0.5);color:var(--red);background:rgba(255,59,59,0.1);}
+.stat-chip{display:flex;align-items:center;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.09em;color:rgba(255,215,0,0.5);}
+.stat-chip.hot{border-color:rgba(255,59,59,0.5);color:var(--red);background:rgba(255,59,59,0.12);}
 
 /* Alert flash */
 #alert-flash{position:absolute;inset:0;border-radius:20px;pointer-events:none;z-index:5;opacity:0;transition:opacity 0.1s;}
-#alert-flash.motion{background:radial-gradient(ellipse at center,rgba(255,215,0,0.08) 0%,transparent 70%);border:2px solid rgba(255,215,0,0.3);border-radius:20px;}
-#alert-flash.sound{background:radial-gradient(ellipse at center,rgba(255,59,59,0.1) 0%,transparent 70%);border:2px solid rgba(255,59,59,0.3);border-radius:20px;}
+#alert-flash.motion{background:radial-gradient(ellipse at center,rgba(255,215,0,0.1) 0%,transparent 70%);border:2px solid rgba(255,215,0,0.35);border-radius:20px;}
+#alert-flash.sound{background:radial-gradient(ellipse at center,rgba(255,59,59,0.1) 0%,transparent 70%);border:2px solid rgba(255,59,59,0.35);border-radius:20px;}
 
 /* CONTROLS */
 #ctrl-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0 4px;flex-shrink:0;}
@@ -118,11 +117,11 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 
 /* TOASTS */
 #toast-stack{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;flex-direction:column-reverse;gap:6px;pointer-events:none;width:calc(100% - 28px);max-width:420px;}
-.toast{padding:10px 14px;border-radius:8px;font-family:var(--font-mono);font-size:0.75rem;letter-spacing:0.08em;background:rgba(14,14,14,0.95);border:1px solid var(--border);backdrop-filter:blur(10px);color:var(--gold);animation:toastin 0.25s ease,toastout 0.3s ease 2.7s forwards;box-shadow:0 4px 20px rgba(0,0,0,0.5);}
+.toast{padding:10px 14px;border-radius:8px;font-family:var(--font-mono);font-size:0.75rem;letter-spacing:0.08em;background:rgba(14,14,14,0.97);border:1px solid var(--border);backdrop-filter:blur(10px);color:var(--gold);animation:tin 0.25s ease,tout 0.3s ease 2.7s forwards;box-shadow:0 4px 20px rgba(0,0,0,0.5);}
 .toast.error{border-color:rgba(255,59,59,0.5);color:var(--red);}
 .toast.success{border-color:rgba(57,255,20,0.4);color:var(--green);}
-@keyframes toastin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes toastout{from{opacity:1}to{opacity:0}}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tout{from{opacity:1}to{opacity:0}}
 @media(min-width:600px){#ctrl-bar{flex-wrap:nowrap;}#alert-bar{width:auto;flex:1;}}
 </style>
 </head>
@@ -141,16 +140,13 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   <!-- TABS -->
   <div id="role-tabs">
     <button class="rtab active" id="tab-camera" onclick="switchRole('camera')">📷 Room Camera</button>
-    <button class="rtab" id="tab-viewer" onclick="switchRole('viewer')">👁 Viewer</button>
+    <button class="rtab"        id="tab-viewer" onclick="switchRole('viewer')">👁 Viewer</button>
   </div>
 
-  <!-- VIEWER PANEL -->
+  <!-- VIEWER: enter Camera ID -->
   <div id="viewer-panel">
-    <label>Active Cameras — tap Watch to connect</label>
-    <div id="active-rooms-list">
-      <div id="viewer-status">Searching for active cameras...</div>
-    </div>
-    <button id="refresh-btn" onclick="refreshRooms()">↻ Refresh</button>
+    <input id="cam-id-input" type="text" placeholder="Enter Camera ID" maxlength="20" oninput="this.value=this.value.toUpperCase()">
+    <button id="watch-btn" onclick="startWatching()">Watch</button>
   </div>
 
   <!-- CAMERA + CONTROLS -->
@@ -170,8 +166,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
         <p id="placeholder-msg">Tap Start Camera to begin</p>
       </div>
 
-      <!-- Room ID on video -->
-      <div id="room-id-overlay"></div>
+      <!-- Camera ID shown on video -->
+      <div id="cam-id-overlay"></div>
 
       <!-- LIVE badge -->
       <div id="live-badge"><div class="ldot"></div>LIVE</div>
@@ -182,7 +178,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
         <div class="stat-chip" id="stat-sound">SOUND: —</div>
       </div>
 
-      <!-- Alert flash overlay -->
+      <!-- Alert flash -->
       <div id="alert-flash"></div>
     </div>
 
@@ -205,46 +201,24 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 
 <script>
 /* ============================================================
-  YAMASSEE SMART MONITOR — Final Version
-  
-  HOW PEER CONNECTION WORKS (no server needed for same-device):
-  Uses BroadcastChannel API — two tabs/windows on same browser
-  talk directly to each other for WebRTC signaling.
-  
-  For remote devices on different networks, run server.js and
-  set USE_SERVER = true below.
-  
-  DETECTION runs on the VIEWER side — it analyzes the incoming
-  video stream so the person watching gets the alerts.
+  YAMASSEE SMART MONITOR
+  Uses PeerJS (free hosted signaling) — works on GitHub Pages,
+  no server needed, works across any device/network.
+
+  CAMERA SIDE:
+    - Opens camera, gets a short Peer ID
+    - Displays that ID on the video feed
+    - Waits for viewers to call in
+
+  VIEWER SIDE:
+    - Enters the Camera ID from the camera screen
+    - Connects via WebRTC through PeerJS
+    - Motion + sound detection runs HERE on the viewer
+
+  HOW TO USE:
+    1. Camera device: open app → Start Camera → note the ID on screen
+    2. Viewer device: open app → Viewer tab → type that ID → Watch
 ============================================================ */
-
-// ── CONFIG ──────────────────────────────────────────────────
-const USE_SERVER   = false; // set true + run server.js for cross-network
-const SERVER_URL   = (location.protocol==='https:'?'wss:':'ws:')+'//'+location.hostname+':3000';
-const ICE_SERVERS  = [{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}];
-const MOTION_THR   = 28;
-const MOTION_PCT   = 0.012;
-const MOTION_COOL  = 2500;
-const SOUND_THR    = 0.10;
-const SOUND_COOL   = 2000;
-const FRAME_MS     = 120;
-
-// ── STATE ───────────────────────────────────────────────────
-let role         = 'camera';
-let roomId       = null;
-let localStream  = null;
-let sensitivity  = 5;
-let peerConn     = null;      // RTCPeerConnection (one at a time for simplicity)
-let motionCtx    = null;
-let prevFrame    = null;
-let frameLoop    = null;
-let audioCtx     = null;
-let analyser     = null;
-let lastMotion   = 0;
-let lastSound    = 0;
-let channel      = null;      // BroadcastChannel for same-browser signaling
-let ws           = null;      // WebSocket for cross-network (optional)
-let wsReady      = false;
 
 // ── DOM ─────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -252,7 +226,7 @@ const video       = $('camera-feed');
 const canvas      = $('motion-canvas');
 const placeholder = $('cam-placeholder');
 const liveBadge   = $('live-badge');
-const roomOverlay = $('room-id-overlay');
+const idOverlay   = $('cam-id-overlay');
 const alertBar    = $('alert-bar');
 const alertText   = $('alert-text');
 const alertFlash  = $('alert-flash');
@@ -263,37 +237,48 @@ const statSound   = $('stat-sound');
 const startBtn    = $('start-btn');
 const stopBtn     = $('stop-btn');
 
-// ── UTILITIES ───────────────────────────────────────────────
-function genId() { return 'ROOM-'+Math.random().toString(36).substring(2,6).toUpperCase(); }
+// ── STATE ────────────────────────────────────────────────────
+let role        = 'camera';
+let peer        = null;   // PeerJS instance
+let localStream = null;
+let sensitivity = 5;
+let motionCtx   = null;
+let prevFrame   = null;
+let frameLoop   = null;
+let audioCtx    = null;
+let analyser    = null;
+let lastMotion  = 0;
+let lastSound   = 0;
+let activeCall  = null;   // current PeerJS call
 
+// ── UTILITIES ────────────────────────────────────────────────
 function toast(msg, type='') {
   const t = document.createElement('div');
-  t.className = 'toast '+type; t.textContent = msg;
+  t.className = 'toast '+type;
+  t.textContent = msg;
   $('toast-stack').prepend(t);
   setTimeout(()=>t.remove(), 3200);
 }
-
 function setConn(cls, txt) { connStatus.className=cls; connText.textContent=txt; }
-
 function setAlert(type, msg) {
   alertBar.className = type==='clear' ? '' : type+'-alert';
   alertText.textContent = msg;
-  if (type !== 'clear') {
+  if (type!=='clear') {
     alertFlash.className = type;
     alertFlash.style.opacity = '1';
     setTimeout(()=>{ alertFlash.style.opacity='0'; alertFlash.className=''; }, 700);
     setTimeout(()=>setAlert('clear','No Alerts'), 4000);
   }
 }
-
 function updateSens(v) {
-  sensitivity = parseInt(v); $('sens-val').textContent = v;
+  sensitivity = parseInt(v);
+  $('sens-val').textContent = v;
   $('sensitivity').style.background =
     `linear-gradient(to right,var(--gold-dim) 0%,var(--gold-dim) ${v*10}%,var(--s3) ${v*10}%,var(--s3) 100%)`;
 }
 updateSens(5);
 
-// ── ROLE SWITCH ─────────────────────────────────────────────
+// ── ROLE SWITCH ──────────────────────────────────────────────
 function switchRole(r) {
   role = r;
   $('tab-camera').classList.toggle('active', r==='camera');
@@ -302,317 +287,270 @@ function switchRole(r) {
   startBtn.style.display = r==='camera' ? '' : 'none';
   stopBtn.style.display  = r==='camera' ? '' : 'none';
   $('sens-group').style.display = r==='camera' ? '' : 'none';
-
-  if (r === 'viewer') {
+  if (r==='viewer') {
     stopCamera();
-    $('placeholder-msg').textContent = 'Select an active camera above to watch';
-    refreshRooms();
+    $('placeholder-msg').textContent = 'Enter the Camera ID above and tap Watch';
+    video.muted = false;
   } else {
-    $('placeholder-msg').textContent = 'Tap Start Camera to begin';
     stopDetection();
+    $('placeholder-msg').textContent = 'Tap Start Camera to begin';
+    video.muted = true;
   }
 }
 
-// ── BROADCAST CHANNEL SIGNALING (same browser, no server) ───
-// Both camera and viewer windows open the SAME channel name.
-// Camera advertises itself; viewer requests connection.
-function setupChannel() {
-  if (channel) channel.close();
-  // Global registry channel — for listing rooms
-  const reg = new BroadcastChannel('yamassee-registry');
-  // Per-room channel for WebRTC signaling
-  channel = reg;
-
-  reg.onmessage = async (e) => {
-    const m = e.data;
-    if (!m || !m.type) return;
-
-    if (role === 'camera') {
-      // Someone asking for room list
-      if (m.type === 'list-rooms') {
-        reg.postMessage({ type:'room-ad', roomId, from:'camera' });
-      }
-      // Viewer wants to connect to OUR room
-      if (m.type === 'join-room' && m.roomId === roomId) {
-        await cameraHandleJoin(m.viewerId);
-      }
-      // ICE from viewer
-      if (m.type === 'ice' && m.to === roomId && m.from !== 'camera') {
-        if (peerConn) try { await peerConn.addIceCandidate(new RTCIceCandidate(m.candidate)); } catch(e){}
-      }
-      // Answer from viewer
-      if (m.type === 'answer' && m.roomId === roomId) {
-        if (peerConn) await peerConn.setRemoteDescription(new RTCSessionDescription(m.sdp));
-      }
-    }
-
-    if (role === 'viewer') {
-      // Camera advertising itself
-      if (m.type === 'room-ad') {
-        renderRooms([{ id: m.roomId }]);
-      }
-      // Offer from camera
-      if (m.type === 'offer' && m.viewerId === viewerSessionId) {
-        await viewerHandleOffer(m);
-      }
-      // ICE from camera
-      if (m.type === 'ice' && m.to === viewerSessionId) {
-        if (peerConn) try { await peerConn.addIceCandidate(new RTCIceCandidate(m.candidate)); } catch(e){}
-      }
-    }
-  };
-}
-
-// Unique ID for this viewer session
-const viewerSessionId = 'viewer-'+Math.random().toString(36).substring(2,8);
-
-// ── ROOM LIST ───────────────────────────────────────────────
-function refreshRooms() {
-  $('active-rooms-list').innerHTML = '<div id="viewer-status" style="font-family:var(--font-mono);font-size:0.72rem;color:rgba(255,215,0,0.35);text-align:center;padding:8px;">Scanning for cameras...</div>';
-  setupChannel();
-  // Ask all camera windows to announce themselves
-  channel.postMessage({ type:'list-rooms' });
-  // If no reply in 2s, say none found
-  setTimeout(()=>{
-    const el = $('viewer-status');
-    if (el) el.textContent = 'No active cameras found — make sure camera tab is open';
-  }, 2000);
-}
-
-function renderRooms(rooms) {
-  const list = $('active-rooms-list');
-  list.innerHTML = '';
-  rooms.forEach(r => {
-    const card = document.createElement('div');
-    card.className = 'room-card';
-    card.innerHTML = `
-      <div>
-        <div class="rc-id"><span class="rc-dot"></span>${r.id}</div>
-        <div class="rc-sub">ACTIVE · TAP WATCH TO CONNECT</div>
-      </div>
-      <button class="rc-watch" onclick="connectToRoom('${r.id}')">Watch</button>`;
-    list.appendChild(card);
-  });
-}
-
-// ── VIEWER: CONNECT TO ROOM ─────────────────────────────────
-async function connectToRoom(targetRoomId) {
-  roomId = targetRoomId;
-  setConn('connecting','Connecting...');
-  $('placeholder-msg').textContent = 'Connecting to '+targetRoomId+'...';
-  setupChannel();
-  // Tell the camera window to send us an offer
-  channel.postMessage({ type:'join-room', roomId:targetRoomId, viewerId:viewerSessionId });
-}
-
-// ── CAMERA: HANDLE VIEWER JOIN ──────────────────────────────
-async function cameraHandleJoin(viewerId) {
-  // Close any existing peer connection
-  if (peerConn) { peerConn.close(); peerConn = null; }
-
-  peerConn = new RTCPeerConnection({ iceServers: ICE_SERVERS });
-
-  // Add all local tracks to send to viewer
-  localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
-
-  peerConn.onicecandidate = e => {
-    if (e.candidate) {
-      channel.postMessage({ type:'ice', to:viewerId, from:'camera', candidate:e.candidate });
-    }
-  };
-
-  const offer = await peerConn.createOffer();
-  await peerConn.setLocalDescription(offer);
-
-  channel.postMessage({ type:'offer', viewerId, roomId, sdp:peerConn.localDescription });
-  toast('👁 Viewer connecting...','success');
-}
-
-// ── VIEWER: HANDLE OFFER ────────────────────────────────────
-async function viewerHandleOffer(m) {
-  if (peerConn) { peerConn.close(); peerConn = null; }
-
-  peerConn = new RTCPeerConnection({ iceServers: ICE_SERVERS });
-
-  peerConn.ontrack = e => {
-    if (e.streams && e.streams[0]) {
-      const stream = e.streams[0];
-      // Unmute for viewer (camera side is muted to prevent feedback)
-      video.muted = false;
-      video.srcObject = stream;
-      placeholder.style.display = 'none';
-      liveBadge.style.display = 'flex';
-      setConn('watching','Watching');
-      toast('✓ Live feed connected','success');
-
-      // ── START DETECTION ON VIEWER SIDE ──
-      // Detection runs here, not on camera
-      startViewerDetection(stream);
-    }
-  };
-
-  peerConn.onicecandidate = e => {
-    if (e.candidate) {
-      channel.postMessage({ type:'ice', to:roomId, from:viewerSessionId, candidate:e.candidate });
-    }
-  };
-
-  peerConn.onconnectionstatechange = () => {
-    if (peerConn.connectionState==='disconnected'||peerConn.connectionState==='failed') {
-      setConn('offline','Disconnected');
-      placeholder.style.display = '';
-      video.srcObject = null;
-      liveBadge.style.display = 'none';
-      stopDetection();
-      toast('Feed disconnected','error');
-    }
-  };
-
-  await peerConn.setRemoteDescription(new RTCSessionDescription(m.sdp));
-  const answer = await peerConn.createAnswer();
-  await peerConn.setLocalDescription(answer);
-
-  channel.postMessage({ type:'answer', roomId:m.roomId, viewerId:viewerSessionId, sdp:peerConn.localDescription });
-}
-
-// ── START CAMERA ────────────────────────────────────────────
+// ── START CAMERA ─────────────────────────────────────────────
 async function startCamera() {
   startBtn.disabled = true;
   setConn('connecting','Starting...');
+  $('placeholder-msg').textContent = 'Requesting camera access...';
 
+  // Get camera + mic
   let stream;
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
-  } catch(err) {
+  } catch(e1) {
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video:true });
       toast('Mic unavailable — video only','');
-    } catch(e) {
+    } catch(e2) {
       startBtn.disabled = false;
       setConn('offline','Offline');
-      toast('Camera access denied — check permissions','error');
-      $('placeholder-msg').textContent = 'Camera access denied — check permissions';
+      $('placeholder-msg').textContent = 'Camera denied — check browser permissions';
+      toast('Camera access denied','error');
       return;
     }
   }
 
   localStream = stream;
-  roomId = genId();
-
-  // Assign stream to video element
-  video.muted = true; // mute on camera side to prevent mic feedback
+  video.muted  = true;  // prevent mic feedback on camera device
   video.srcObject = stream;
 
-  // Show room ID on video
-  roomOverlay.textContent = roomId;
-  roomOverlay.style.display = 'block';
-
-  // Hide placeholder, show live state
+  // Show video immediately
   placeholder.style.display = 'none';
-  liveBadge.style.display = 'flex';
-  stopBtn.disabled = false;
+  liveBadge.style.display   = 'flex';
+  stopBtn.disabled  = false;
   startBtn.textContent = 'Restart';
   startBtn.disabled = false;
-  setConn('live','Broadcasting · '+roomId);
 
-  // Open signaling channel so viewers can find this camera
-  setupChannel();
-  toast('Camera live — viewers can now connect','success');
+  // Create PeerJS peer — gets a free unique ID from PeerJS servers
+  setConn('connecting','Getting ID...');
+  $('placeholder-msg').textContent = '';
+
+  if (peer) { peer.destroy(); peer = null; }
+
+  peer = new Peer({ debug: 0 });
+
+  peer.on('open', (id) => {
+    // Show the ID on the video feed — this is what viewer types in
+    idOverlay.textContent = id;
+    idOverlay.style.display = 'block';
+    setConn('live', 'Broadcasting');
+    toast('Camera live! Share ID: '+id, 'success');
+  });
+
+  peer.on('error', (err) => {
+    toast('Connection error: '+err.type, 'error');
+    console.error('PeerJS error:', err);
+  });
+
+  // When a viewer calls in, answer with our stream
+  peer.on('call', (call) => {
+    activeCall = call;
+    call.answer(localStream);
+    toast('👁 Viewer connected', 'success');
+    call.on('close', ()=>toast('Viewer disconnected',''));
+    call.on('error', (e)=>console.warn('Call error:',e));
+  });
 }
 
-// ── STOP CAMERA ─────────────────────────────────────────────
+// ── STOP CAMERA ──────────────────────────────────────────────
 function stopCamera() {
-  if (localStream) { localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
-  if (peerConn)    { peerConn.close(); peerConn=null; }
-  if (channel)     { channel.close(); channel=null; }
+  if (activeCall) { activeCall.close(); activeCall=null; }
+  if (peer)       { peer.destroy(); peer=null; }
+  if (localStream){ localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
   video.srcObject = null;
   video.muted = true;
-  liveBadge.style.display = 'none';
   placeholder.style.display = '';
-  roomOverlay.style.display = 'none';
-  startBtn.disabled = false;
+  liveBadge.style.display   = 'none';
+  idOverlay.style.display   = 'none';
+  idOverlay.textContent     = '';
   startBtn.textContent = 'Start Camera';
-  stopBtn.disabled = true;
+  startBtn.disabled = false;
+  stopBtn.disabled  = true;
   setConn('offline','Offline');
-  roomId = null;
   setAlert('clear','No Alerts');
   stopDetection();
   statMotion.textContent = 'MOTION: —';
   statSound.textContent  = 'SOUND: —';
 }
 
-// ── DETECTION (runs on VIEWER side) ─────────────────────────
-function startViewerDetection(stream) {
-  stopDetection(); // clear any previous
+// ── VIEWER: CONNECT TO CAMERA ────────────────────────────────
+function startWatching() {
+  const camId = $('cam-id-input').value.trim();
+  if (!camId) { toast('Enter a Camera ID','error'); return; }
 
-  // Motion — canvas frame comparison against live video
-  canvas.width=160; canvas.height=120;
-  motionCtx = canvas.getContext('2d',{willReadFrequently:true});
+  $('watch-btn').disabled = true;
+  setConn('connecting','Connecting...');
+  $('placeholder-msg').textContent = 'Connecting to camera...';
+  placeholder.style.display = '';
+
+  if (peer) { peer.destroy(); peer=null; }
+
+  // Create a viewer peer
+  peer = new Peer({ debug: 0 });
+
+  peer.on('error', (err)=>{
+    toast('Could not connect: '+err.type,'error');
+    $('watch-btn').disabled = false;
+    setConn('offline','Offline');
+    $('placeholder-msg').textContent = 'Connection failed — check the Camera ID';
+  });
+
+  peer.on('open', () => {
+    // Call the camera peer ID
+    const call = peer.call(camId, null); // null = no stream from viewer
+    activeCall = call;
+
+    if (!call) {
+      toast('Could not reach camera — is it online?','error');
+      $('watch-btn').disabled = false;
+      setConn('offline','Offline');
+      return;
+    }
+
+    // Receive the camera stream
+    call.on('stream', (remoteStream) => {
+      video.muted = false;
+      video.srcObject = remoteStream;
+      placeholder.style.display = 'none';
+      liveBadge.style.display   = 'flex';
+      setConn('watching','Watching');
+      $('watch-btn').disabled = false;
+      toast('✓ Live feed connected','success');
+
+      // ── DETECTION RUNS ON VIEWER SIDE ──
+      startDetection(remoteStream);
+    });
+
+    call.on('close', ()=>{
+      setConn('offline','Disconnected');
+      video.srcObject = null;
+      liveBadge.style.display = 'none';
+      placeholder.style.display = '';
+      $('placeholder-msg').textContent = 'Camera disconnected';
+      $('watch-btn').disabled = false;
+      stopDetection();
+      toast('Camera feed ended','error');
+    });
+
+    call.on('error', (e)=>{
+      toast('Stream error','error');
+      $('watch-btn').disabled = false;
+      console.error(e);
+    });
+
+    // Timeout if no stream arrives in 10s
+    setTimeout(()=>{
+      if (!video.srcObject) {
+        toast('No response — check Camera ID','error');
+        $('watch-btn').disabled = false;
+        setConn('offline','Offline');
+        $('placeholder-msg').textContent = 'No camera found with that ID';
+        call.close();
+      }
+    }, 10000);
+  });
+}
+
+// ── DETECTION (runs on VIEWER) ────────────────────────────────
+function startDetection(stream) {
+  stopDetection();
+
+  // MOTION — canvas frame-diff on the video element
+  canvas.width  = 160;
+  canvas.height = 120;
+  motionCtx = canvas.getContext('2d', { willReadFrequently:true });
   prevFrame = null;
   motionLoop();
 
-  // Sound — analyze the incoming audio track
+  // SOUND — analyze incoming audio track
   try {
-    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const src = audioCtx.createMediaStreamSource(stream);
-    analyser = audioCtx.createAnalyser();
+    analyser  = audioCtx.createAnalyser();
     analyser.fftSize = 512;
     src.connect(analyser);
     soundLoop();
-  } catch(e) { console.warn('Audio detection unavailable:', e); }
+  } catch(e) {
+    console.warn('Audio detection unavailable:', e);
+  }
 }
 
 function stopDetection() {
-  cancelAnimationFrame(frameLoop); frameLoop=null;
-  if (audioCtx) { try{audioCtx.close();}catch(e){} audioCtx=null; analyser=null; }
+  if (frameLoop) { cancelAnimationFrame(frameLoop); frameLoop=null; }
+  if (audioCtx)  { try{audioCtx.close();}catch(e){} audioCtx=null; analyser=null; }
   prevFrame = null;
 }
 
 function motionLoop() {
   if (!video.srcObject) return;
-  frameLoop = requestAnimationFrame(()=>setTimeout(motionLoop, FRAME_MS));
+  frameLoop = requestAnimationFrame(() => setTimeout(motionLoop, 120));
   if (video.readyState < 2) return;
-  motionCtx.drawImage(video,0,0,160,120);
-  const cur = motionCtx.getImageData(0,0,160,120);
+
+  motionCtx.drawImage(video, 0, 0, 160, 120);
+  const cur = motionCtx.getImageData(0, 0, 160, 120);
+
   if (prevFrame) {
-    const d1=prevFrame.data, d2=cur.data;
-    let n=0; const total=d1.length/4;
-    const thr = MOTION_THR*(1-(sensitivity-1)/12);
-    for (let i=0;i<d1.length;i+=4) {
-      if ((Math.abs(d1[i]-d2[i])+Math.abs(d1[i+1]-d2[i+1])+Math.abs(d1[i+2]-d2[i+2]))/3>thr) n++;
+    const d1 = prevFrame.data, d2 = cur.data;
+    let changed = 0;
+    const total = d1.length / 4;
+    const thr   = 28 * (1 - (sensitivity-1)/12);
+
+    for (let i=0; i<d1.length; i+=4) {
+      if ((Math.abs(d1[i]-d2[i]) + Math.abs(d1[i+1]-d2[i+1]) + Math.abs(d1[i+2]-d2[i+2])) / 3 > thr)
+        changed++;
     }
-    const ratio=n/total;
-    const lvl=Math.min(100,Math.round(ratio*4500));
-    statMotion.textContent='MOTION: '+lvl+'%';
-    statMotion.classList.toggle('hot',lvl>25);
-    const now=Date.now();
-    if (ratio > MOTION_PCT*(1-(sensitivity-1)/14) && now-lastMotion>MOTION_COOL) {
-      lastMotion=now; fireAlert('motion','⚡ Motion Detected');
+
+    const ratio = changed / total;
+    const lvl   = Math.min(100, Math.round(ratio * 4500));
+    statMotion.textContent = 'MOTION: '+lvl+'%';
+    statMotion.classList.toggle('hot', lvl > 25);
+
+    const triggerPct = 0.012 * (1 - (sensitivity-1)/14);
+    const now = Date.now();
+    if (ratio > triggerPct && now - lastMotion > 2500) {
+      lastMotion = now;
+      fireAlert('motion', '⚡ Motion Detected');
     }
   }
-  prevFrame=cur;
+  prevFrame = cur;
 }
 
 function soundLoop() {
   if (!audioCtx) return;
   requestAnimationFrame(soundLoop);
-  const data=new Uint8Array(analyser.frequencyBinCount);
+
+  const data = new Uint8Array(analyser.frequencyBinCount);
   analyser.getByteFrequencyData(data);
-  let sum=0; for(let i=0;i<data.length;i++) sum+=data[i];
-  const avg=sum/data.length/255;
-  const lvl=Math.min(100,Math.round(avg*500));
-  statSound.textContent='SOUND: '+lvl+'%';
-  statSound.classList.toggle('hot',lvl>30);
-  const now=Date.now();
-  const thr=SOUND_THR*(1-(sensitivity-1)/13);
-  if (avg>thr && now-lastSound>SOUND_COOL) {
-    lastSound=now; fireAlert('sound','🔊 Sound Detected');
+  let sum = 0;
+  for (let i=0; i<data.length; i++) sum += data[i];
+  const avg = sum / data.length / 255;
+  const lvl = Math.min(100, Math.round(avg * 500));
+
+  statSound.textContent = 'SOUND: '+lvl+'%';
+  statSound.classList.toggle('hot', lvl > 30);
+
+  const thr = 0.10 * (1 - (sensitivity-1)/13);
+  const now = Date.now();
+  if (avg > thr && now - lastSound > 2000) {
+    lastSound = now;
+    fireAlert('sound', '🔊 Sound Detected');
   }
 }
 
 function fireAlert(type, msg) {
   setAlert(type, msg);
-  toast('🔔 '+msg, type==='sound'?'error':'');
+  toast('🔔 '+msg, type==='sound' ? 'error' : '');
 }
 
 // ── INIT ────────────────────────────────────────────────────
