@@ -230,14 +230,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
     2. Viewer device: open app → Viewer tab → type that ID → Watch
 ============================================================ */
 
-// ── SHORT ID GENERATOR ──────────────────────────────────────
-function shortId() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let id = "YAM-";
-  for (let i=0; i<4; i++) id += chars[Math.floor(Math.random()*chars.length)];
-  return id;
-}
-
 // ── DOM ─────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 const video       = $('camera-feed');
@@ -356,16 +348,18 @@ async function startCamera() {
 
   if (peer) { peer.destroy(); peer = null; }
 
-  const myId = shortId();
-  peer = new Peer(myId, { debug: 0 });
+  peer = new Peer({ debug: 0 });
 
   peer.on('open', (id) => {
     // Show the ID on the video feed — this is what viewer types in
-    idOverlay.textContent = id;
+    // Show short display — copy button copies full ID
+    const shortDisplay = id.slice(-6).toUpperCase();
+    idOverlay.textContent = 'CAM: ' + shortDisplay;
+    idOverlay._fullId = id; // store full ID for copy
     idOverlay.style.display = 'block';
     $('copy-id-btn').style.display = 'block';
     setConn('live', 'Broadcasting');
-    toast('Camera live! Share ID: '+id, 'success');
+    toast('Camera live! Tap Copy ID to share', 'success');
   });
 
   peer.on('error', (err) => {
@@ -570,7 +564,7 @@ function soundLoop() {
 }
 
 function copyId() {
-  const id = $('cam-id-overlay').textContent;
+  const id = $('cam-id-overlay')._fullId || $('cam-id-overlay').textContent;
   if (!id) return;
   navigator.clipboard.writeText(id).then(()=>{
     const btn = $('copy-id-btn');
