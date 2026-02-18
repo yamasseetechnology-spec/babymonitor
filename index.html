@@ -220,6 +220,14 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
     2. Viewer device: open app → Viewer tab → type that ID → Watch
 ============================================================ */
 
+// ── SHORT ID GENERATOR ──────────────────────────────────────
+function shortId() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let id = "YAM-";
+  for (let i=0; i<4; i++) id += chars[Math.floor(Math.random()*chars.length)];
+  return id;
+}
+
 // ── DOM ─────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 const video       = $('camera-feed');
@@ -338,7 +346,8 @@ async function startCamera() {
 
   if (peer) { peer.destroy(); peer = null; }
 
-  peer = new Peer({ debug: 0 });
+  const myId = shortId();
+  peer = new Peer(myId, { debug: 0 });
 
   peer.on('open', (id) => {
     // Show the ID on the video feed — this is what viewer types in
