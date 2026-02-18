@@ -408,7 +408,7 @@ function startWatching() {
 
   peer.on('open', () => {
     // Call the camera peer ID
-    const call = peer.call(camId, null); // null = no stream from viewer
+    const call = peer.call(camId, new MediaStream()); // empty stream — viewer receives only
     activeCall = call;
 
     if (!call) {
