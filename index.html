@@ -427,51 +427,40 @@ async function startCamera() {
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
   } catch(err) {
-    // Try video only if audio fails
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: true });
       toast('Microphone unavailable — video only','');
     } catch(e) {
       startBtn.disabled = false;
       setConn('offline','Offline');
-      toast('⚠ Camera access denied','error');
-      $('placeholder-msg').textContent = 'Camera access denied — check permissions';
+      toast('Camera access denied — check browser permissions','error');
+      $('placeholder-msg').textContent = 'Camera access denied';
       return;
     }
   }
 
   STATE.localStream = stream;
   STATE.roomId = genRoomId();
+  video.srcObject = stream;
 
   // Show room ID on video immediately
   roomOverlay.textContent = STATE.roomId;
   roomOverlay.style.display = 'block';
 
-  video.srcObject = stream;
+  // Hide placeholder and show live UI right away — no event waiting
+  placeholder.style.display = 'none';
+  liveBadge.style.display = 'flex';
+  stopBtn.disabled = false;
+  startBtn.textContent = 'Restart';
+  startBtn.disabled = false;
+  setConn('live','Live');
 
-  // Use both onloadedmetadata AND canplay for reliability
-  function onReady() {
-    video.removeEventListener('canplay', onReady);
-    placeholder.style.display = 'none';
-    liveBadge.style.display = 'flex';
-    stopBtn.disabled = false;
-    startBtn.textContent = 'Restart';
-    startBtn.disabled = false;
-    setConn('live','Live');
-    setupMotionDetection();
-    setupSoundDetection();
-    connectWS(() => {
-      if (STATE.wsReady) wsSend({ type: 'create-room', roomId: STATE.roomId });
-    });
-  }
+  setupMotionDetection();
+  setupSoundDetection();
 
-  video.addEventListener('canplay', onReady);
-  video.onloadedmetadata = () => video.play().catch(()=>{});
-
-  // Fallback — if canplay doesn't fire in 2s, force it
-  setTimeout(() => {
-    if (placeholder.style.display !== 'none') onReady();
-  }, 2000);
+  connectWS(() => {
+    if (STATE.wsReady) wsSend({ type: 'create-room', roomId: STATE.roomId });
+  });
 }
 
 // ── STOP CAMERA ────────────────────────────────────────────
