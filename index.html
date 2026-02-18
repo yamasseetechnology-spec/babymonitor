@@ -720,23 +720,25 @@ async function startCamera() {
       startBtn.disabled = false;
       modeLabel.textContent = 'ROOM CAMERA MODE';
 
+      // Generate Room ID immediately — show it right away on the video
+      STATE.roomId = genRoomId();
+      const overlay = document.getElementById('room-id-overlay');
+      overlay.textContent = STATE.roomId;
+      overlay.style.display = 'block';
+      roomIdTag.textContent = STATE.roomId;
+
       // Setup detection
       setupMotionDetection();
       setupSoundDetection();
 
-      // Connect to signaling server and create room
+      // Try to connect signaling server (optional — overlay already visible)
       connectWS(() => {
         if (STATE.wsReady) {
-          STATE.roomId = STATE.roomId || genRoomId();
           wsSend({ type: 'create-room', roomId: STATE.roomId });
-          showRoomBanner(STATE.roomId);
+          setConnStatus('live', 'Broadcasting');
         } else {
-          // No server — local only
-          STATE.roomId = genRoomId();
-          roomIdTag.textContent = STATE.roomId;
           setConnStatus('live', 'Local Preview');
           toast('Camera active (no signaling server)', '');
-          showRoomBanner(STATE.roomId);
         }
       });
     };
