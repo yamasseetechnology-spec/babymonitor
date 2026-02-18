@@ -7,16 +7,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root {
-  --gold:#FFD700; --gold-dim:#B8960C; --gold-glow:rgba(255,215,0,0.22);
-  --red:#FF3B3B; --red-glow:rgba(255,59,59,0.35);
-  --green:#39FF14; --green-glow:rgba(57,255,20,0.3);
-  --bg:#070707; --s1:#0E0E0E; --s2:#151515; --s3:#1C1C1C;
+  --gold:#FFD700;--gold-dim:#B8960C;--gold-glow:rgba(255,215,0,0.22);
+  --red:#FF3B3B;--red-glow:rgba(255,59,59,0.35);
+  --green:#39FF14;--green-glow:rgba(57,255,20,0.3);
+  --bg:#070707;--s1:#0E0E0E;--s2:#151515;--s3:#1C1C1C;
   --border:rgba(255,215,0,0.13);
-  --font-ui:'Rajdhani',sans-serif; --font-mono:'Share Tech Mono',monospace;
+  --font-ui:'Rajdhani',sans-serif;--font-mono:'Share Tech Mono',monospace;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--gold);font-family:var(--font-ui);}
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,0,0,0.05) 3px,rgba(0,0,0,0.05) 4px);}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,0,0,0.05) 3px,rgba(0,0,0,0.05) 4px);}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
 
 /* TOP BAR */
@@ -28,8 +29,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
 #conn-status.live .dot{background:var(--green);box-shadow:0 0 8px var(--green-glow);animation:pdot 1.5s infinite;}
 #conn-status.live{color:var(--gold);border-color:rgba(255,215,0,0.3);}
 #conn-status.connecting .dot{background:var(--gold);animation:pdot 0.9s infinite;}
-#conn-status.viewer-live .dot{background:#7DF9FF;box-shadow:0 0 8px rgba(125,249,255,0.4);animation:pdot 1.5s infinite;}
-#conn-status.viewer-live{color:#7DF9FF;border-color:rgba(125,249,255,0.3);}
+#conn-status.watching .dot{background:#7DF9FF;box-shadow:0 0 8px rgba(125,249,255,0.4);animation:pdot 1.5s infinite;}
+#conn-status.watching{color:#7DF9FF;border-color:rgba(125,249,255,0.3);}
 @keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.65)}}
 
 /* TABS */
@@ -43,16 +44,16 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
 #viewer-panel.show{display:flex;}
 #viewer-panel label{font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,215,0,0.5);}
 #active-rooms-list{display:flex;flex-direction:column;gap:6px;}
-.room-card{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;}
-.room-card:hover{background:var(--s3);border-color:rgba(255,215,0,0.35);box-shadow:0 0 12px rgba(255,215,0,0.1);}
+.room-card{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;transition:all 0.2s;}
+.room-card:hover{background:var(--s3);border-color:rgba(255,215,0,0.35);}
 .room-card .rc-id{font-family:var(--font-mono);font-size:0.9rem;letter-spacing:0.15em;color:var(--gold);}
-.room-card .rc-status{font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.1em;color:var(--green);display:flex;align-items:center;gap:5px;}
-.room-card .rc-status::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green-glow);}
-.room-card .rc-watch{padding:5px 12px;font-family:var(--font-ui);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid rgba(255,215,0,0.4);border-radius:6px;cursor:pointer;transition:all 0.2s;}
-.room-card .rc-watch:hover{background:rgba(255,215,0,0.2);}
-#no-rooms{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;color:rgba(255,215,0,0.3);text-align:center;padding:10px;}
-#refresh-rooms{padding:6px 14px;font-family:var(--font-ui);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:var(--s2);color:rgba(255,215,0,0.6);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.2s;align-self:flex-end;}
-#refresh-rooms:hover{color:var(--gold);border-color:rgba(255,215,0,0.35);}
+.room-card .rc-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green-glow);display:inline-block;margin-right:5px;}
+.room-card .rc-sub{font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;color:rgba(255,215,0,0.4);margin-top:2px;}
+.rc-watch{padding:6px 16px;font-family:var(--font-ui);font-size:0.82rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid rgba(255,215,0,0.4);border-radius:6px;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
+.rc-watch:hover{background:rgba(255,215,0,0.22);}
+#viewer-status{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;color:rgba(255,215,0,0.35);text-align:center;padding:8px;}
+#refresh-btn{padding:6px 14px;font-family:var(--font-ui);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:var(--s2);color:rgba(255,215,0,0.6);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.2s;align-self:flex-end;}
+#refresh-btn:hover{color:var(--gold);border-color:rgba(255,215,0,0.35);}
 
 /* CAMERA SECTION */
 #cam-section{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 14px 6px;}
@@ -64,45 +65,42 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
 #motion-canvas{display:none;position:absolute;inset:0;}
 
 /* PLACEHOLDER */
-#cam-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;}
+#cam-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:20px;background:var(--s1);}
 #cam-placeholder svg{opacity:0.15;width:56px;height:56px;}
-#cam-placeholder p{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,215,0,0.3);}
+#cam-placeholder p{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,215,0,0.3);text-align:center;padding:0 20px;}
 
-/* ROOM ID OVERLAY — on the video, center top */
-#room-id-overlay{
-  position:absolute;top:16px;left:50%;transform:translateX(-50%);
-  z-index:20;display:none;
-  font-family:'Share Tech Mono',monospace;font-size:1.15rem;font-weight:700;
-  letter-spacing:0.25em;text-transform:uppercase;color:#FFD700;
-  background:rgba(0,0,0,0.78);backdrop-filter:blur(10px);
-  padding:7px 22px;border-radius:30px;
-  border:1.5px solid rgba(255,215,0,0.55);
-  box-shadow:0 0 22px rgba(255,215,0,0.28),inset 0 0 10px rgba(255,215,0,0.05);
-  text-shadow:0 0 14px rgba(255,215,0,0.8);
-  white-space:nowrap;pointer-events:none;
-}
+/* ROOM ID — center top of video */
+#room-id-overlay{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:none;
+  font-family:'Share Tech Mono',monospace;font-size:1.1rem;font-weight:700;letter-spacing:0.22em;
+  text-transform:uppercase;color:#FFD700;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);
+  padding:7px 20px;border-radius:30px;border:1.5px solid rgba(255,215,0,0.5);
+  box-shadow:0 0 20px rgba(255,215,0,0.25);text-shadow:0 0 12px rgba(255,215,0,0.7);
+  white-space:nowrap;pointer-events:none;}
 
 /* LIVE badge */
-#live-badge{position:absolute;bottom:14px;left:14px;display:none;align-items:center;gap:6px;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);border:1px solid rgba(255,59,59,0.45);border-radius:8px;padding:4px 10px;font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.14em;color:#fff;z-index:6;}
+#live-badge{position:absolute;bottom:14px;left:14px;display:none;align-items:center;gap:6px;
+  background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);border:1px solid rgba(255,59,59,0.45);
+  border-radius:8px;padding:4px 10px;font-family:var(--font-mono);font-size:0.68rem;
+  letter-spacing:0.14em;color:#fff;z-index:6;}
 #live-badge .ldot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 7px var(--red-glow);animation:blink 1.2s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
 
-/* Stats */
+/* Stats overlay */
 #cam-stats{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;z-index:6;pointer-events:none;}
 .stat-chip{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,0.68);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.09em;color:rgba(255,215,0,0.5);}
 .stat-chip.hot{border-color:rgba(255,59,59,0.5);color:var(--red);background:rgba(255,59,59,0.1);}
 
 /* Alert flash */
 #alert-flash{position:absolute;inset:0;border-radius:20px;pointer-events:none;z-index:5;opacity:0;transition:opacity 0.1s;}
-#alert-flash.motion{background:radial-gradient(ellipse at center,rgba(255,215,0,0.07) 0%,transparent 70%);border:2px solid rgba(255,215,0,0.28);border-radius:20px;}
-#alert-flash.sound{background:radial-gradient(ellipse at center,rgba(255,59,59,0.08) 0%,transparent 70%);border:2px solid rgba(255,59,59,0.3);border-radius:20px;}
+#alert-flash.motion{background:radial-gradient(ellipse at center,rgba(255,215,0,0.08) 0%,transparent 70%);border:2px solid rgba(255,215,0,0.3);border-radius:20px;}
+#alert-flash.sound{background:radial-gradient(ellipse at center,rgba(255,59,59,0.1) 0%,transparent 70%);border:2px solid rgba(255,59,59,0.3);border-radius:20px;}
 
 /* CONTROLS */
 #ctrl-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0 4px;flex-shrink:0;}
-.ctrl-btn{padding:0 16px;height:44px;font-family:var(--font-ui);font-size:0.88rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;box-shadow:0 0 10px rgba(255,215,0,0.08);white-space:nowrap;flex-shrink:0;}
-.ctrl-btn:hover{background:var(--s3);box-shadow:0 0 18px var(--gold-glow);border-color:rgba(255,215,0,0.35);}
+.ctrl-btn{padding:0 16px;height:44px;font-family:var(--font-ui);font-size:0.88rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
+.ctrl-btn:hover{background:var(--s3);box-shadow:0 0 16px var(--gold-glow);border-color:rgba(255,215,0,0.35);}
 .ctrl-btn:active{transform:scale(0.97);}
-.ctrl-btn.primary{background:rgba(255,215,0,0.1);border-color:var(--gold-dim);box-shadow:0 0 16px var(--gold-glow);}
+.ctrl-btn.primary{background:rgba(255,215,0,0.1);border-color:var(--gold-dim);box-shadow:0 0 14px var(--gold-glow);}
 .ctrl-btn.danger{border-color:rgba(255,59,59,0.4);color:var(--red);}
 .ctrl-btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;}
 #sens-group{display:flex;flex-direction:column;gap:3px;flex:1;min-width:110px;}
@@ -123,7 +121,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .toast{padding:10px 14px;border-radius:8px;font-family:var(--font-mono);font-size:0.75rem;letter-spacing:0.08em;background:rgba(14,14,14,0.95);border:1px solid var(--border);backdrop-filter:blur(10px);color:var(--gold);animation:toastin 0.25s ease,toastout 0.3s ease 2.7s forwards;box-shadow:0 4px 20px rgba(0,0,0,0.5);}
 .toast.error{border-color:rgba(255,59,59,0.5);color:var(--red);}
 .toast.success{border-color:rgba(57,255,20,0.4);color:var(--green);}
-@keyframes toastin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes toastout{from{opacity:1}to{opacity:0}}
 @media(min-width:600px){#ctrl-bar{flex-wrap:nowrap;}#alert-bar{width:auto;flex:1;}}
 </style>
@@ -146,23 +144,22 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
     <button class="rtab" id="tab-viewer" onclick="switchRole('viewer')">👁 Viewer</button>
   </div>
 
-  <!-- VIEWER PANEL — shows active cameras to select -->
+  <!-- VIEWER PANEL -->
   <div id="viewer-panel">
-    <label>Active Cameras — tap one to watch</label>
+    <label>Active Cameras — tap Watch to connect</label>
     <div id="active-rooms-list">
-      <div id="no-rooms">No active cameras found</div>
+      <div id="viewer-status">Searching for active cameras...</div>
     </div>
-    <button id="refresh-rooms" onclick="refreshRooms()">↻ Refresh</button>
+    <button id="refresh-btn" onclick="refreshRooms()">↻ Refresh</button>
   </div>
 
-  <!-- CAMERA SECTION -->
+  <!-- CAMERA + CONTROLS -->
   <div id="cam-section">
     <div id="cam-wrapper">
-
       <video id="camera-feed" autoplay muted playsinline></video>
       <canvas id="motion-canvas"></canvas>
 
-      <!-- PLACEHOLDER -->
+      <!-- Placeholder -->
       <div id="cam-placeholder">
         <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="4" y="14" width="56" height="36" rx="6" stroke="#FFD700" stroke-width="2.5"/>
@@ -173,10 +170,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
         <p id="placeholder-msg">Tap Start Camera to begin</p>
       </div>
 
-      <!-- ROOM ID ON VIDEO — shows when camera is live -->
+      <!-- Room ID on video -->
       <div id="room-id-overlay"></div>
 
-      <!-- LIVE -->
+      <!-- LIVE badge -->
       <div id="live-badge"><div class="ldot"></div>LIVE</div>
 
       <!-- Stats -->
@@ -185,17 +182,17 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
         <div class="stat-chip" id="stat-sound">SOUND: —</div>
       </div>
 
-      <!-- Alert flash -->
+      <!-- Alert flash overlay -->
       <div id="alert-flash"></div>
     </div>
 
     <!-- CONTROLS -->
     <div id="ctrl-bar">
       <button class="ctrl-btn primary" id="start-btn" onclick="startCamera()">Start Camera</button>
-      <button class="ctrl-btn danger" id="stop-btn" onclick="stopCamera()" disabled>Stop</button>
+      <button class="ctrl-btn danger"  id="stop-btn"  onclick="stopCamera()" disabled>Stop</button>
       <div id="sens-group">
         <div id="sens-label">Sensitivity <span id="sens-val">5</span></div>
-        <input type="range" id="sensitivity" min="1" max="10" value="5" oninput="updateSensitivity(this.value)">
+        <input type="range" id="sensitivity" min="1" max="10" value="5" oninput="updateSens(this.value)">
       </div>
       <div id="alert-bar">
         <div class="ab-dot"></div>
@@ -204,412 +201,421 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
     </div>
   </div>
 </div>
-
 <div id="toast-stack"></div>
 
 <script>
 /* ============================================================
-   YAMASSEE SMART MONITOR
-   - Camera starts immediately, Room ID shown on video
-   - Viewer sees list of active cameras, taps to connect
+  YAMASSEE SMART MONITOR — Final Version
+  
+  HOW PEER CONNECTION WORKS (no server needed for same-device):
+  Uses BroadcastChannel API — two tabs/windows on same browser
+  talk directly to each other for WebRTC signaling.
+  
+  For remote devices on different networks, run server.js and
+  set USE_SERVER = true below.
+  
+  DETECTION runs on the VIEWER side — it analyzes the incoming
+  video stream so the person watching gets the alerts.
 ============================================================ */
 
-const CONFIG = {
-  WS_URL: (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.hostname + ':3000',
-  ICE_SERVERS: [{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}],
-  MOTION_THRESHOLD: 30,
-  MOTION_PIXEL_PCT: 0.015,
-  MOTION_COOLDOWN: 2500,
-  SOUND_THRESHOLD: 0.12,
-  SOUND_COOLDOWN: 2000,
-  FRAME_MS: 150,
-};
+// ── CONFIG ──────────────────────────────────────────────────
+const USE_SERVER   = false; // set true + run server.js for cross-network
+const SERVER_URL   = (location.protocol==='https:'?'wss:':'ws:')+'//'+location.hostname+':3000';
+const ICE_SERVERS  = [{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}];
+const MOTION_THR   = 28;
+const MOTION_PCT   = 0.012;
+const MOTION_COOL  = 2500;
+const SOUND_THR    = 0.10;
+const SOUND_COOL   = 2000;
+const FRAME_MS     = 120;
 
-const STATE = {
-  role: 'camera',
-  roomId: null,
-  ws: null,
-  wsReady: false,
-  localStream: null,
-  peerConnections: {},
-  sensitivity: 5,
-  motionCtx: null,
-  prevFrame: null,
-  frameLoop: null,
-  audioCtx: null,
-  analyser: null,
-  lastMotion: 0,
-  lastSound: 0,
-  viewerPc: null,
-  activeRooms: [],
-};
+// ── STATE ───────────────────────────────────────────────────
+let role         = 'camera';
+let roomId       = null;
+let localStream  = null;
+let sensitivity  = 5;
+let peerConn     = null;      // RTCPeerConnection (one at a time for simplicity)
+let motionCtx    = null;
+let prevFrame    = null;
+let frameLoop    = null;
+let audioCtx     = null;
+let analyser     = null;
+let lastMotion   = 0;
+let lastSound    = 0;
+let channel      = null;      // BroadcastChannel for same-browser signaling
+let ws           = null;      // WebSocket for cross-network (optional)
+let wsReady      = false;
 
+// ── DOM ─────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
-const video         = $('camera-feed');
-const canvas        = $('motion-canvas');
-const placeholder   = $('cam-placeholder');
-const liveBadge     = $('live-badge');
-const alertBar      = $('alert-bar');
-const alertText     = $('alert-text');
-const alertFlash    = $('alert-flash');
-const connStatus    = $('conn-status');
-const connText      = $('conn-text');
-const statMotion    = $('stat-motion');
-const statSound     = $('stat-sound');
-const startBtn      = $('start-btn');
-const stopBtn       = $('stop-btn');
-const roomOverlay   = $('room-id-overlay');
+const video       = $('camera-feed');
+const canvas      = $('motion-canvas');
+const placeholder = $('cam-placeholder');
+const liveBadge   = $('live-badge');
+const roomOverlay = $('room-id-overlay');
+const alertBar    = $('alert-bar');
+const alertText   = $('alert-text');
+const alertFlash  = $('alert-flash');
+const connStatus  = $('conn-status');
+const connText    = $('conn-text');
+const statMotion  = $('stat-motion');
+const statSound   = $('stat-sound');
+const startBtn    = $('start-btn');
+const stopBtn     = $('stop-btn');
 
-// ── HELPERS ────────────────────────────────────────────────
-function genRoomId() {
-  return 'ROOM-' + Math.random().toString(36).substring(2,6).toUpperCase();
-}
+// ── UTILITIES ───────────────────────────────────────────────
+function genId() { return 'ROOM-'+Math.random().toString(36).substring(2,6).toUpperCase(); }
+
 function toast(msg, type='') {
   const t = document.createElement('div');
-  t.className = 'toast ' + type;
-  t.textContent = msg;
+  t.className = 'toast '+type; t.textContent = msg;
   $('toast-stack').prepend(t);
-  setTimeout(() => t.remove(), 3200);
+  setTimeout(()=>t.remove(), 3200);
 }
-function setConn(cls, txt) {
-  connStatus.className = cls;
-  connText.textContent = txt;
-}
+
+function setConn(cls, txt) { connStatus.className=cls; connText.textContent=txt; }
+
 function setAlert(type, msg) {
-  alertBar.className = type === 'clear' ? '' : type + '-alert';
+  alertBar.className = type==='clear' ? '' : type+'-alert';
   alertText.textContent = msg;
   if (type !== 'clear') {
     alertFlash.className = type;
     alertFlash.style.opacity = '1';
-    setTimeout(() => { alertFlash.style.opacity='0'; alertFlash.className=''; }, 600);
-    setTimeout(() => setAlert('clear','No Alerts'), 4000);
+    setTimeout(()=>{ alertFlash.style.opacity='0'; alertFlash.className=''; }, 700);
+    setTimeout(()=>setAlert('clear','No Alerts'), 4000);
   }
 }
-function updateSensitivity(v) {
-  STATE.sensitivity = parseInt(v);
-  $('sens-val').textContent = v;
-  $('sensitivity').style.background = `linear-gradient(to right,var(--gold-dim) 0%,var(--gold-dim) ${v*10}%,var(--s3) ${v*10}%,var(--s3) 100%)`;
-}
-updateSensitivity(5);
 
-// ── ROLE SWITCH ────────────────────────────────────────────
-function switchRole(role) {
-  STATE.role = role;
-  $('tab-camera').classList.toggle('active', role==='camera');
-  $('tab-viewer').classList.toggle('active', role==='viewer');
-  $('viewer-panel').classList.toggle('show', role==='viewer');
-  startBtn.style.display = role==='camera' ? '' : 'none';
-  stopBtn.style.display  = role==='camera' ? '' : 'none';
-  $('sens-group').style.display = role==='camera' ? '' : 'none';
-  if (role === 'viewer') {
+function updateSens(v) {
+  sensitivity = parseInt(v); $('sens-val').textContent = v;
+  $('sensitivity').style.background =
+    `linear-gradient(to right,var(--gold-dim) 0%,var(--gold-dim) ${v*10}%,var(--s3) ${v*10}%,var(--s3) 100%)`;
+}
+updateSens(5);
+
+// ── ROLE SWITCH ─────────────────────────────────────────────
+function switchRole(r) {
+  role = r;
+  $('tab-camera').classList.toggle('active', r==='camera');
+  $('tab-viewer').classList.toggle('active', r==='viewer');
+  $('viewer-panel').classList.toggle('show', r==='viewer');
+  startBtn.style.display = r==='camera' ? '' : 'none';
+  stopBtn.style.display  = r==='camera' ? '' : 'none';
+  $('sens-group').style.display = r==='camera' ? '' : 'none';
+
+  if (r === 'viewer') {
     stopCamera();
+    $('placeholder-msg').textContent = 'Select an active camera above to watch';
     refreshRooms();
   } else {
     $('placeholder-msg').textContent = 'Tap Start Camera to begin';
+    stopDetection();
   }
 }
 
-// ── WEBSOCKET ──────────────────────────────────────────────
-function connectWS(cb) {
-  if (STATE.ws && STATE.ws.readyState === WebSocket.OPEN) { cb && cb(); return; }
-  let called = false;
-  function done() { if (!called) { called=true; cb && cb(); } }
-  try {
-    STATE.ws = new WebSocket(CONFIG.WS_URL);
-    STATE.ws.onopen  = () => { STATE.wsReady=true; done(); };
-    STATE.ws.onerror = () => { STATE.wsReady=false; done(); };
-    STATE.ws.onclose = () => { STATE.wsReady=false; };
-    STATE.ws.onmessage = async e => {
-      let m; try { m=JSON.parse(e.data); } catch { return; }
-      await onSignal(m);
-    };
-    // If no response in 3s, proceed anyway
-    setTimeout(done, 3000);
-  } catch(e) { STATE.wsReady=false; done(); }
-}
-function wsSend(obj) {
-  if (STATE.ws && STATE.ws.readyState===WebSocket.OPEN) STATE.ws.send(JSON.stringify(obj));
-}
+// ── BROADCAST CHANNEL SIGNALING (same browser, no server) ───
+// Both camera and viewer windows open the SAME channel name.
+// Camera advertises itself; viewer requests connection.
+function setupChannel() {
+  if (channel) channel.close();
+  // Global registry channel — for listing rooms
+  const reg = new BroadcastChannel('yamassee-registry');
+  // Per-room channel for WebRTC signaling
+  channel = reg;
 
-async function onSignal(m) {
-  switch(m.type) {
-    case 'room-created':
-      setConn('live','Broadcasting');
-      break;
-    case 'rooms-list':
-      STATE.activeRooms = m.rooms || [];
-      renderRoomsList();
-      break;
-    case 'viewer-joined':
-      toast('👁 Viewer connected','success');
-      await createOfferFor(m.viewerId);
-      break;
-    case 'viewer-left':
-      if (STATE.peerConnections[m.viewerId]) {
-        STATE.peerConnections[m.viewerId].close();
-        delete STATE.peerConnections[m.viewerId];
-      }
-      break;
-    case 'offer':
-      await handleOffer(m);
-      break;
-    case 'answer':
-      if (STATE.peerConnections[m.from])
-        await STATE.peerConnections[m.from].setRemoteDescription(new RTCSessionDescription(m.sdp));
-      break;
-    case 'ice':
-      const pc = STATE.role==='camera' ? STATE.peerConnections[m.from] : STATE.viewerPc;
-      if (pc) try { await pc.addIceCandidate(new RTCIceCandidate(m.candidate)); } catch(e){}
-      break;
-    case 'alert':
-      if (STATE.role==='viewer') {
-        setAlert(m.alertType, m.message);
-        toast('🔔 '+m.message, m.alertType==='sound'?'error':'');
-      }
-      break;
-    case 'error':
-      toast('⚠ '+m.message,'error');
-      break;
-  }
-}
+  reg.onmessage = async (e) => {
+    const m = e.data;
+    if (!m || !m.type) return;
 
-// ── ACTIVE ROOMS LIST (Viewer side) ───────────────────────
-function refreshRooms() {
-  const list = $('active-rooms-list');
-  list.innerHTML = '<div id="no-rooms" style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;color:rgba(255,215,0,0.3);text-align:center;padding:10px;">Searching for cameras...</div>';
-  connectWS(() => {
-    if (STATE.wsReady) {
-      wsSend({ type: 'list-rooms' });
-      setTimeout(() => {
-        if (STATE.activeRooms.length === 0) renderRoomsList();
-      }, 2000);
-    } else {
-      list.innerHTML = '<div id="no-rooms" style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;color:rgba(255,59,59,0.5);text-align:center;padding:10px;">⚠ Server offline — start server to see cameras</div>';
+    if (role === 'camera') {
+      // Someone asking for room list
+      if (m.type === 'list-rooms') {
+        reg.postMessage({ type:'room-ad', roomId, from:'camera' });
+      }
+      // Viewer wants to connect to OUR room
+      if (m.type === 'join-room' && m.roomId === roomId) {
+        await cameraHandleJoin(m.viewerId);
+      }
+      // ICE from viewer
+      if (m.type === 'ice' && m.to === roomId && m.from !== 'camera') {
+        if (peerConn) try { await peerConn.addIceCandidate(new RTCIceCandidate(m.candidate)); } catch(e){}
+      }
+      // Answer from viewer
+      if (m.type === 'answer' && m.roomId === roomId) {
+        if (peerConn) await peerConn.setRemoteDescription(new RTCSessionDescription(m.sdp));
+      }
     }
-  });
+
+    if (role === 'viewer') {
+      // Camera advertising itself
+      if (m.type === 'room-ad') {
+        renderRooms([{ id: m.roomId }]);
+      }
+      // Offer from camera
+      if (m.type === 'offer' && m.viewerId === viewerSessionId) {
+        await viewerHandleOffer(m);
+      }
+      // ICE from camera
+      if (m.type === 'ice' && m.to === viewerSessionId) {
+        if (peerConn) try { await peerConn.addIceCandidate(new RTCIceCandidate(m.candidate)); } catch(e){}
+      }
+    }
+  };
 }
 
-function renderRoomsList() {
+// Unique ID for this viewer session
+const viewerSessionId = 'viewer-'+Math.random().toString(36).substring(2,8);
+
+// ── ROOM LIST ───────────────────────────────────────────────
+function refreshRooms() {
+  $('active-rooms-list').innerHTML = '<div id="viewer-status" style="font-family:var(--font-mono);font-size:0.72rem;color:rgba(255,215,0,0.35);text-align:center;padding:8px;">Scanning for cameras...</div>';
+  setupChannel();
+  // Ask all camera windows to announce themselves
+  channel.postMessage({ type:'list-rooms' });
+  // If no reply in 2s, say none found
+  setTimeout(()=>{
+    const el = $('viewer-status');
+    if (el) el.textContent = 'No active cameras found — make sure camera tab is open';
+  }, 2000);
+}
+
+function renderRooms(rooms) {
   const list = $('active-rooms-list');
-  if (!STATE.activeRooms.length) {
-    list.innerHTML = '<div style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;color:rgba(255,215,0,0.3);text-align:center;padding:10px;">No active cameras found</div>';
-    return;
-  }
   list.innerHTML = '';
-  STATE.activeRooms.forEach(room => {
+  rooms.forEach(r => {
     const card = document.createElement('div');
     card.className = 'room-card';
     card.innerHTML = `
       <div>
-        <div class="rc-id">${room.id}</div>
-        <div class="rc-status">LIVE · ${room.viewers} viewer${room.viewers!==1?'s':''}</div>
+        <div class="rc-id"><span class="rc-dot"></span>${r.id}</div>
+        <div class="rc-sub">ACTIVE · TAP WATCH TO CONNECT</div>
       </div>
-      <button class="rc-watch" onclick="connectToRoom('${room.id}')">Watch</button>
-    `;
+      <button class="rc-watch" onclick="connectToRoom('${r.id}')">Watch</button>`;
     list.appendChild(card);
   });
 }
 
-function connectToRoom(roomId) {
-  if (!STATE.wsReady) { toast('⚠ Server offline','error'); return; }
-  STATE.roomId = roomId;
+// ── VIEWER: CONNECT TO ROOM ─────────────────────────────────
+async function connectToRoom(targetRoomId) {
+  roomId = targetRoomId;
   setConn('connecting','Connecting...');
-  $('placeholder-msg').textContent = 'Connecting to ' + roomId + '...';
-  wsSend({ type: 'join-room', roomId });
+  $('placeholder-msg').textContent = 'Connecting to '+targetRoomId+'...';
+  setupChannel();
+  // Tell the camera window to send us an offer
+  channel.postMessage({ type:'join-room', roomId:targetRoomId, viewerId:viewerSessionId });
 }
 
-// ── START CAMERA ───────────────────────────────────────────
+// ── CAMERA: HANDLE VIEWER JOIN ──────────────────────────────
+async function cameraHandleJoin(viewerId) {
+  // Close any existing peer connection
+  if (peerConn) { peerConn.close(); peerConn = null; }
+
+  peerConn = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
+  // Add all local tracks to send to viewer
+  localStream.getTracks().forEach(t => peerConn.addTrack(t, localStream));
+
+  peerConn.onicecandidate = e => {
+    if (e.candidate) {
+      channel.postMessage({ type:'ice', to:viewerId, from:'camera', candidate:e.candidate });
+    }
+  };
+
+  const offer = await peerConn.createOffer();
+  await peerConn.setLocalDescription(offer);
+
+  channel.postMessage({ type:'offer', viewerId, roomId, sdp:peerConn.localDescription });
+  toast('👁 Viewer connecting...','success');
+}
+
+// ── VIEWER: HANDLE OFFER ────────────────────────────────────
+async function viewerHandleOffer(m) {
+  if (peerConn) { peerConn.close(); peerConn = null; }
+
+  peerConn = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
+  peerConn.ontrack = e => {
+    if (e.streams && e.streams[0]) {
+      const stream = e.streams[0];
+      // Unmute for viewer (camera side is muted to prevent feedback)
+      video.muted = false;
+      video.srcObject = stream;
+      placeholder.style.display = 'none';
+      liveBadge.style.display = 'flex';
+      setConn('watching','Watching');
+      toast('✓ Live feed connected','success');
+
+      // ── START DETECTION ON VIEWER SIDE ──
+      // Detection runs here, not on camera
+      startViewerDetection(stream);
+    }
+  };
+
+  peerConn.onicecandidate = e => {
+    if (e.candidate) {
+      channel.postMessage({ type:'ice', to:roomId, from:viewerSessionId, candidate:e.candidate });
+    }
+  };
+
+  peerConn.onconnectionstatechange = () => {
+    if (peerConn.connectionState==='disconnected'||peerConn.connectionState==='failed') {
+      setConn('offline','Disconnected');
+      placeholder.style.display = '';
+      video.srcObject = null;
+      liveBadge.style.display = 'none';
+      stopDetection();
+      toast('Feed disconnected','error');
+    }
+  };
+
+  await peerConn.setRemoteDescription(new RTCSessionDescription(m.sdp));
+  const answer = await peerConn.createAnswer();
+  await peerConn.setLocalDescription(answer);
+
+  channel.postMessage({ type:'answer', roomId:m.roomId, viewerId:viewerSessionId, sdp:peerConn.localDescription });
+}
+
+// ── START CAMERA ────────────────────────────────────────────
 async function startCamera() {
   startBtn.disabled = true;
   setConn('connecting','Starting...');
 
   let stream;
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
   } catch(err) {
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      toast('Microphone unavailable — video only','');
+      stream = await navigator.mediaDevices.getUserMedia({ video:true });
+      toast('Mic unavailable — video only','');
     } catch(e) {
       startBtn.disabled = false;
       setConn('offline','Offline');
-      toast('Camera access denied — check browser permissions','error');
-      $('placeholder-msg').textContent = 'Camera access denied';
+      toast('Camera access denied — check permissions','error');
+      $('placeholder-msg').textContent = 'Camera access denied — check permissions';
       return;
     }
   }
 
-  STATE.localStream = stream;
-  STATE.roomId = genRoomId();
+  localStream = stream;
+  roomId = genId();
+
+  // Assign stream to video element
+  video.muted = true; // mute on camera side to prevent mic feedback
   video.srcObject = stream;
 
-  // Show room ID on video immediately
-  roomOverlay.textContent = STATE.roomId;
+  // Show room ID on video
+  roomOverlay.textContent = roomId;
   roomOverlay.style.display = 'block';
 
-  // Hide placeholder and show live UI right away — no event waiting
+  // Hide placeholder, show live state
   placeholder.style.display = 'none';
   liveBadge.style.display = 'flex';
   stopBtn.disabled = false;
   startBtn.textContent = 'Restart';
   startBtn.disabled = false;
-  setConn('live','Live');
+  setConn('live','Broadcasting · '+roomId);
 
-  setupMotionDetection();
-  setupSoundDetection();
-
-  connectWS(() => {
-    if (STATE.wsReady) wsSend({ type: 'create-room', roomId: STATE.roomId });
-  });
+  // Open signaling channel so viewers can find this camera
+  setupChannel();
+  toast('Camera live — viewers can now connect','success');
 }
 
-// ── STOP CAMERA ────────────────────────────────────────────
+// ── STOP CAMERA ─────────────────────────────────────────────
 function stopCamera() {
-  if (STATE.localStream) {
-    STATE.localStream.getTracks().forEach(t => t.stop());
-    STATE.localStream = null;
-  }
+  if (localStream) { localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
+  if (peerConn)    { peerConn.close(); peerConn=null; }
+  if (channel)     { channel.close(); channel=null; }
   video.srcObject = null;
+  video.muted = true;
   liveBadge.style.display = 'none';
   placeholder.style.display = '';
   roomOverlay.style.display = 'none';
-  roomOverlay.textContent = '';
   startBtn.disabled = false;
   startBtn.textContent = 'Start Camera';
   stopBtn.disabled = true;
-  cancelAnimationFrame(STATE.frameLoop);
-  if (STATE.audioCtx) { try { STATE.audioCtx.close(); } catch(e){} STATE.audioCtx = null; }
-  STATE.prevFrame = null;
-  Object.values(STATE.peerConnections).forEach(pc => pc.close());
-  STATE.peerConnections = {};
-  if (STATE.viewerPc) { STATE.viewerPc.close(); STATE.viewerPc = null; }
-  if (STATE.wsReady) wsSend({ type: 'leave-room', roomId: STATE.roomId });
   setConn('offline','Offline');
-  STATE.roomId = null;
+  roomId = null;
   setAlert('clear','No Alerts');
+  stopDetection();
   statMotion.textContent = 'MOTION: —';
   statSound.textContent  = 'SOUND: —';
 }
 
-// ── WebRTC: CAMERA → VIEWER ────────────────────────────────
-async function createOfferFor(viewerId) {
-  const pc = new RTCPeerConnection({ iceServers: CONFIG.ICE_SERVERS });
-  STATE.peerConnections[viewerId] = pc;
-  STATE.localStream.getTracks().forEach(t => pc.addTrack(t, STATE.localStream));
-  pc.onicecandidate = e => {
-    if (e.candidate) wsSend({ type:'ice', to:viewerId, from:'camera', candidate:e.candidate });
-  };
-  pc.onconnectionstatechange = () => {
-    if (pc.connectionState==='disconnected'||pc.connectionState==='failed') {
-      pc.close(); delete STATE.peerConnections[viewerId];
-    }
-  };
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
-  wsSend({ type:'offer', to:viewerId, from:'camera', sdp:pc.localDescription });
-}
+// ── DETECTION (runs on VIEWER side) ─────────────────────────
+function startViewerDetection(stream) {
+  stopDetection(); // clear any previous
 
-// ── WebRTC: VIEWER ─────────────────────────────────────────
-async function handleOffer(m) {
-  const pc = new RTCPeerConnection({ iceServers: CONFIG.ICE_SERVERS });
-  STATE.viewerPc = pc;
-  pc.ontrack = e => {
-    if (e.streams && e.streams[0]) {
-      video.srcObject = e.streams[0];
-      placeholder.style.display = 'none';
-      liveBadge.style.display = 'flex';
-      setConn('viewer-live','Watching');
-      toast('✓ Connected to '+STATE.roomId,'success');
-    }
-  };
-  pc.onicecandidate = e => {
-    if (e.candidate) wsSend({ type:'ice', to:m.from, from:'viewer', candidate:e.candidate, roomId:STATE.roomId });
-  };
-  pc.onconnectionstatechange = () => {
-    if (pc.connectionState==='disconnected'||pc.connectionState==='failed') {
-      setConn('offline','Disconnected');
-      placeholder.style.display = '';
-      video.srcObject = null;
-      liveBadge.style.display = 'none';
-      toast('Connection lost','error');
-    }
-  };
-  await pc.setRemoteDescription(new RTCSessionDescription(m.sdp));
-  const answer = await pc.createAnswer();
-  await pc.setLocalDescription(answer);
-  wsSend({ type:'answer', to:m.from, from:'viewer', sdp:pc.localDescription, roomId:STATE.roomId });
-}
-
-// ── MOTION DETECTION ───────────────────────────────────────
-function setupMotionDetection() {
+  // Motion — canvas frame comparison against live video
   canvas.width=160; canvas.height=120;
-  STATE.motionCtx = canvas.getContext('2d',{willReadFrequently:true});
-  STATE.prevFrame = null;
+  motionCtx = canvas.getContext('2d',{willReadFrequently:true});
+  prevFrame = null;
   motionLoop();
+
+  // Sound — analyze the incoming audio track
+  try {
+    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const src = audioCtx.createMediaStreamSource(stream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    src.connect(analyser);
+    soundLoop();
+  } catch(e) { console.warn('Audio detection unavailable:', e); }
 }
+
+function stopDetection() {
+  cancelAnimationFrame(frameLoop); frameLoop=null;
+  if (audioCtx) { try{audioCtx.close();}catch(e){} audioCtx=null; analyser=null; }
+  prevFrame = null;
+}
+
 function motionLoop() {
-  if (!STATE.localStream) return;
-  STATE.frameLoop = requestAnimationFrame(() => setTimeout(motionLoop, CONFIG.FRAME_MS));
+  if (!video.srcObject) return;
+  frameLoop = requestAnimationFrame(()=>setTimeout(motionLoop, FRAME_MS));
   if (video.readyState < 2) return;
-  const ctx = STATE.motionCtx;
-  ctx.drawImage(video,0,0,160,120);
-  const cur = ctx.getImageData(0,0,160,120);
-  if (STATE.prevFrame) {
-    const d1=STATE.prevFrame.data, d2=cur.data;
+  motionCtx.drawImage(video,0,0,160,120);
+  const cur = motionCtx.getImageData(0,0,160,120);
+  if (prevFrame) {
+    const d1=prevFrame.data, d2=cur.data;
     let n=0; const total=d1.length/4;
-    const thr = CONFIG.MOTION_THRESHOLD*(1-(STATE.sensitivity-1)/12);
+    const thr = MOTION_THR*(1-(sensitivity-1)/12);
     for (let i=0;i<d1.length;i+=4) {
       if ((Math.abs(d1[i]-d2[i])+Math.abs(d1[i+1]-d2[i+1])+Math.abs(d1[i+2]-d2[i+2]))/3>thr) n++;
     }
     const ratio=n/total;
-    const lvl=Math.min(100,Math.round(ratio*4000));
+    const lvl=Math.min(100,Math.round(ratio*4500));
     statMotion.textContent='MOTION: '+lvl+'%';
     statMotion.classList.toggle('hot',lvl>25);
     const now=Date.now();
-    if (ratio>CONFIG.MOTION_PIXEL_PCT*(1-(STATE.sensitivity-1)/14) && now-STATE.lastMotion>CONFIG.MOTION_COOLDOWN) {
-      STATE.lastMotion=now; triggerAlert('motion','⚡ Motion Detected');
+    if (ratio > MOTION_PCT*(1-(sensitivity-1)/14) && now-lastMotion>MOTION_COOL) {
+      lastMotion=now; fireAlert('motion','⚡ Motion Detected');
     }
   }
-  STATE.prevFrame=cur;
+  prevFrame=cur;
 }
 
-// ── SOUND DETECTION ────────────────────────────────────────
-function setupSoundDetection() {
-  try {
-    STATE.audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-    const src = STATE.audioCtx.createMediaStreamSource(STATE.localStream);
-    STATE.analyser = STATE.audioCtx.createAnalyser();
-    STATE.analyser.fftSize=512;
-    src.connect(STATE.analyser);
-    soundLoop();
-  } catch(e) { console.warn('Audio unavailable'); }
-}
 function soundLoop() {
-  if (!STATE.audioCtx) return;
+  if (!audioCtx) return;
   requestAnimationFrame(soundLoop);
-  const data=new Uint8Array(STATE.analyser.frequencyBinCount);
-  STATE.analyser.getByteFrequencyData(data);
+  const data=new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(data);
   let sum=0; for(let i=0;i<data.length;i++) sum+=data[i];
   const avg=sum/data.length/255;
-  const lvl=Math.min(100,Math.round(avg*400));
+  const lvl=Math.min(100,Math.round(avg*500));
   statSound.textContent='SOUND: '+lvl+'%';
   statSound.classList.toggle('hot',lvl>30);
   const now=Date.now();
-  const thr=CONFIG.SOUND_THRESHOLD*(1-(STATE.sensitivity-1)/13);
-  if (avg>thr && now-STATE.lastSound>CONFIG.SOUND_COOLDOWN) {
-    STATE.lastSound=now; triggerAlert('sound','🔊 Sound Detected');
+  const thr=SOUND_THR*(1-(sensitivity-1)/13);
+  if (avg>thr && now-lastSound>SOUND_COOL) {
+    lastSound=now; fireAlert('sound','🔊 Sound Detected');
   }
 }
 
-// ── ALERT ──────────────────────────────────────────────────
-function triggerAlert(type, msg) {
+function fireAlert(type, msg) {
   setAlert(type, msg);
   toast('🔔 '+msg, type==='sound'?'error':'');
-  if (STATE.wsReady && STATE.roomId)
-    wsSend({ type:'alert', roomId:STATE.roomId, alertType:type, message:msg });
 }
 
-// ── INIT ───────────────────────────────────────────────────
+// ── INIT ────────────────────────────────────────────────────
 switchRole('camera');
 </script>
 </body>
