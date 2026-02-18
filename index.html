@@ -166,8 +166,18 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
         <p id="placeholder-msg">Tap Start Camera to begin</p>
       </div>
 
-      <!-- Camera ID shown on video -->
+      <!-- Camera ID + copy button on video -->
       <div id="cam-id-overlay"></div>
+      <button id="copy-id-btn" onclick="copyId()" style="
+        display:none;position:absolute;top:16px;right:14px;z-index:20;
+        font-family:'Share Tech Mono',monospace;font-size:0.7rem;font-weight:700;
+        letter-spacing:0.1em;text-transform:uppercase;color:#FFD700;
+        background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);
+        padding:7px 14px;border-radius:20px;
+        border:1.5px solid rgba(255,215,0,0.5);
+        box-shadow:0 0 16px rgba(255,215,0,0.2);
+        cursor:pointer;transition:all 0.2s;white-space:nowrap;
+      ">📋 Copy ID</button>
 
       <!-- LIVE badge -->
       <div id="live-badge"><div class="ldot"></div>LIVE</div>
@@ -353,6 +363,7 @@ async function startCamera() {
     // Show the ID on the video feed — this is what viewer types in
     idOverlay.textContent = id;
     idOverlay.style.display = 'block';
+    $('copy-id-btn').style.display = 'block';
     setConn('live', 'Broadcasting');
     toast('Camera live! Share ID: '+id, 'success');
   });
@@ -383,6 +394,7 @@ function stopCamera() {
   liveBadge.style.display   = 'none';
   idOverlay.style.display   = 'none';
   idOverlay.textContent     = '';
+  $('copy-id-btn').style.display = 'none';
   startBtn.textContent = 'Start Camera';
   startBtn.disabled = false;
   stopBtn.disabled  = true;
@@ -555,6 +567,22 @@ function soundLoop() {
     lastSound = now;
     fireAlert('sound', '🔊 Sound Detected');
   }
+}
+
+function copyId() {
+  const id = $('cam-id-overlay').textContent;
+  if (!id) return;
+  navigator.clipboard.writeText(id).then(()=>{
+    const btn = $('copy-id-btn');
+    btn.textContent = '✓ Copied!';
+    btn.style.color = '#39FF14';
+    btn.style.borderColor = 'rgba(57,255,20,0.5)';
+    setTimeout(()=>{
+      btn.textContent = '📋 Copy ID';
+      btn.style.color = '#FFD700';
+      btn.style.borderColor = 'rgba(255,215,0,0.5)';
+    }, 2000);
+  }).catch(()=>toast('Could not copy','error'));
 }
 
 function fireAlert(type, msg) {
