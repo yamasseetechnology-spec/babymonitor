@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Yamassee Smart Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   VARIABLES & RESET
+============================================================ */
+:root {
+  --gold:         #FFD700;
+  --gold-dim:     #B8960C;
+  --gold-glow:    rgba(255,215,0,0.22);
+  --gold-glow-sm: rgba(255,215,0,0.10);
+  --red:          #FF3B3B;
+  --red-glow:     rgba(255,59,59,0.35);
+  --green:        #39FF14;
+  --green-glow:   rgba(57,255,20,0.3);
+  --bg:           #070707;
+  --s1:           #0E0E0E;
+  --s2:           #151515;
+  --s3:           #1C1C1C;
+  --border:       rgba(255,215,0,0.13);
+  --font-ui:      'Rajdhani', sans-serif;
+  --font-mono:    'Share Tech Mono', monospace;
+  --r-sm:         8px;
+  --r-md:         14px;
+  --r-lg:         20px;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--gold); font-family:var(--font-ui); }
+
+/* Scanline atmosphere */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
+  background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
+}
+
+/* ============================================================
+   LAYOUT
+============================================================ */
+#app { display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden; }
+
+/* ============================================================
+   TOP BAR
+============================================================ */
+#top-bar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 14px; background:var(--s1);
+  border-bottom:1px solid var(--border); flex-shrink:0; position:relative;
+}
+#top-bar::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+#logo {
+  height:34px; width:auto; object-fit:contain;
+  filter:drop-shadow(0 0 8px var(--gold-glow));
+}
+#top-right { display:flex; align-items:center; gap:8px; }
+#room-id-tag {
+  font-family:var(--font-mono); font-size:0.62rem; letter-spacing:0.1em;
+  color:rgba(255,215,0,0.35); text-transform:uppercase;
+}
+#conn-status {
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--font-mono); font-size:0.7rem; letter-spacing:0.1em;
+  text-transform:uppercase; padding:4px 10px;
+  background:var(--s2); border:1px solid var(--border); border-radius:20px;
+  color:rgba(255,215,0,0.45); transition:all 0.3s;
+}
+#conn-status .dot { width:7px; height:7px; border-radius:50%; background:rgba(255,215,0,0.25); flex-shrink:0; transition:all 0.3s; }
+#conn-status.connecting .dot { background:var(--gold); animation:pdot 0.9s infinite; }
+#conn-status.live .dot { background:var(--green); box-shadow:0 0 8px var(--green-glow); animation:pdot 1.5s infinite; }
+#conn-status.live { color:var(--gold); border-color:rgba(255,215,0,0.3); }
+#conn-status.viewer-live { color:#7DF9FF; border-color:rgba(125,249,255,0.3); }
+#conn-status.viewer-live .dot { background:#7DF9FF; box-shadow:0 0 8px rgba(125,249,255,0.4); animation:pdot 1.5s infinite; }
+@keyframes pdot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.3;transform:scale(0.65)} }
+
+/* ============================================================
+   ROLE TABS
+============================================================ */
+#role-tabs {
+  display:flex; gap:6px; padding:7px 14px;
+  background:var(--s1); border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.rtab {
+  flex:1; padding:7px 8px; font-family:var(--font-ui); font-size:0.82rem;
+  font-weight:600; letter-spacing:0.07em; text-transform:uppercase;
+  background:var(--s2); color:rgba(255,215,0,0.45);
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  cursor:pointer; transition:all 0.2s; min-height:44px;
+}
+.rtab.active { background:rgba(255,215,0,0.08); color:var(--gold); border-color:var(--gold-dim); box-shadow:0 0 14px var(--gold-glow-sm); }
+.rtab:hover:not(.active) { background:var(--s3); color:var(--gold); }
+
+/* ============================================================
+   CAMERA SECTION
+============================================================ */
+#cam-section { flex:1; min-height:0; display:flex; flex-direction:column; padding:10px 14px 6px; gap:0; }
+
+#cam-wrapper {
+  flex:1; min-height:0; position:relative;
+  border-radius:var(--r-lg); overflow:hidden;
+  border:1px solid var(--border);
+  background:var(--s1);
+  box-shadow:inset 0 0 35px rgba(255,215,0,0.05), 0 0 40px rgba(0,0,0,0.7);
+}
+/* Corner brackets */
+#cam-wrapper::before, #cam-wrapper::after {
+  content:''; position:absolute; width:18px; height:18px;
+  border-color:rgba(255,215,0,0.5); border-style:solid; z-index:6; pointer-events:none;
+}
+#cam-wrapper::before { top:10px; left:10px; border-width:2px 0 0 2px; border-radius:3px 0 0 0; }
+#cam-wrapper::after  { bottom:10px; right:10px; border-width:0 2px 2px 0; border-radius:0 0 3px 0; }
+
+#camera-feed {
+  width:100%; height:100%; object-fit:cover; display:block;
+  border-radius:var(--r-lg);
+}
+#motion-canvas { display:none; position:absolute; inset:0; }
+
+/* Placeholder */
+#cam-placeholder {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:12px; border-radius:var(--r-lg);
+}
+#cam-placeholder svg { opacity:0.15; width:56px; height:56px; }
+#cam-placeholder p {
+  font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.16em;
+  text-transform:uppercase; color:rgba(255,215,0,0.3);
+}
+#cam-placeholder.hidden { display:none; }
+
+/* LIVE badge */
+#live-badge {
+  position:absolute; top:12px; left:12px;
+  display:flex; align-items:center; gap:6px;
+  background:rgba(0,0,0,0.72); backdrop-filter:blur(6px);
+  border:1px solid rgba(255,59,59,0.45); border-radius:var(--r-sm);
+  padding:4px 10px; font-family:var(--font-mono); font-size:0.68rem;
+  letter-spacing:0.14em; color:#fff; z-index:6;
+  opacity:0; transition:opacity 0.35s; pointer-events:none;
+}
+#live-badge.show { opacity:1; }
+#live-badge .ldot { width:7px; height:7px; border-radius:50%; background:var(--red); box-shadow:0 0 7px var(--red-glow); animation:blink 1.2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+/* Stats overlay (top-right) */
+#cam-stats {
+  position:absolute; top:12px; right:12px;
+  display:flex; flex-direction:column; align-items:flex-end; gap:4px; z-index:6; pointer-events:none;
+}
+.stat-chip {
+  display:flex; align-items:center; gap:5px;
+  background:rgba(0,0,0,0.68); backdrop-filter:blur(6px);
+  border:1px solid var(--border); border-radius:6px;
+  padding:3px 8px; font-family:var(--font-mono); font-size:0.62rem;
+  letter-spacing:0.09em; color:rgba(255,215,0,0.5);
+}
+.stat-chip.hot { border-color:rgba(255,59,59,0.5); color:var(--red); background:rgba(255,59,59,0.1); }
+
+/* Mode label (bottom center) */
+#mode-label {
+  position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
+  font-family:var(--font-mono); font-size:0.62rem; letter-spacing:0.16em;
+  text-transform:uppercase; color:rgba(255,215,0,0.4);
+  background:rgba(0,0,0,0.55); backdrop-filter:blur(6px);
+  padding:4px 14px; border-radius:20px; border:1px solid var(--border);
+  z-index:6; white-space:nowrap; pointer-events:none;
+}
+
+/* Alert flash overlay */
+#alert-flash {
+  position:absolute; inset:0; border-radius:var(--r-lg);
+  pointer-events:none; z-index:5; opacity:0; transition:opacity 0.1s;
+}
+#alert-flash.motion { background:radial-gradient(ellipse at center, rgba(255,215,0,0.07) 0%, transparent 70%); border:2px solid rgba(255,215,0,0.28); border-radius:var(--r-lg); }
+#alert-flash.sound  { background:radial-gradient(ellipse at center, rgba(255,59,59,0.08) 0%, transparent 70%); border:2px solid rgba(255,59,59,0.3); border-radius:var(--r-lg); }
+
+/* ============================================================
+   CONTROL BAR
+============================================================ */
+#ctrl-bar {
+  display:flex; flex-wrap:wrap; align-items:center;
+  gap:8px; padding:8px 0 4px; flex-shrink:0;
+}
+
+/* Buttons */
+.ctrl-btn {
+  padding:0 16px; height:44px; font-family:var(--font-ui);
+  font-size:0.88rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+  background:var(--s2); color:var(--gold); border:1px solid var(--border);
+  border-radius:var(--r-sm); cursor:pointer; transition:all 0.2s;
+  box-shadow:0 0 10px var(--gold-glow-sm); white-space:nowrap; flex-shrink:0;
+}
+.ctrl-btn:hover { background:var(--s3); box-shadow:0 0 18px var(--gold-glow); border-color:rgba(255,215,0,0.35); }
+.ctrl-btn:active { transform:scale(0.97); }
+.ctrl-btn.primary { background:rgba(255,215,0,0.1); border-color:var(--gold-dim); box-shadow:0 0 16px var(--gold-glow); }
+.ctrl-btn.primary:hover { background:rgba(255,215,0,0.18); }
+.ctrl-btn.danger { border-color:rgba(255,59,59,0.4); color:var(--red); box-shadow:0 0 10px rgba(255,59,59,0.1); }
+.ctrl-btn.danger:hover { background:rgba(255,59,59,0.1); box-shadow:0 0 18px rgba(255,59,59,0.25); }
+.ctrl-btn:disabled { opacity:0.35; cursor:not-allowed; transform:none; }
+
+/* Sensitivity slider group */
+#sens-group { display:flex; flex-direction:column; gap:3px; flex:1; min-width:110px; }
+#sens-label { font-family:var(--font-mono); font-size:0.62rem; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,215,0,0.45); display:flex; justify-content:space-between; }
+#sens-label span { color:var(--gold); }
+#sensitivity {
+  -webkit-appearance:none; appearance:none;
+  width:100%; height:4px; border-radius:2px;
+  background:linear-gradient(to right, var(--gold-dim) 0%, var(--gold-dim) 50%, var(--s3) 50%, var(--s3) 100%);
+  outline:none; cursor:pointer;
+}
+#sensitivity::-webkit-slider-thumb {
+  -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+  background:var(--gold); border:2px solid var(--bg);
+  box-shadow:0 0 8px var(--gold-glow); cursor:pointer;
+}
+#sensitivity::-moz-range-thumb {
+  width:18px; height:18px; border-radius:50%;
+  background:var(--gold); border:2px solid var(--bg);
+  box-shadow:0 0 8px var(--gold-glow); cursor:pointer;
+}
+
+/* Alert ticker */
+#alert-bar {
+  width:100%; padding:7px 12px;
+  background:var(--s2); border:1px solid var(--border); border-radius:var(--r-sm);
+  font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.09em;
+  color:rgba(255,215,0,0.45); display:flex; align-items:center; gap:8px;
+  transition:all 0.3s; flex-shrink:0;
+}
+#alert-bar .ab-dot { width:7px; height:7px; border-radius:50%; background:rgba(255,215,0,0.25); flex-shrink:0; transition:all 0.3s; }
+#alert-bar.motion-alert { border-color:rgba(255,215,0,0.45); color:var(--gold); background:rgba(255,215,0,0.07); }
+#alert-bar.motion-alert .ab-dot { background:var(--gold); box-shadow:0 0 8px var(--gold-glow); animation:pdot 0.8s infinite; }
+#alert-bar.sound-alert  { border-color:rgba(255,59,59,0.5); color:var(--red); background:rgba(255,59,59,0.07); }
+#alert-bar.sound-alert .ab-dot  { background:var(--red); box-shadow:0 0 8px var(--red-glow); animation:pdot 0.8s infinite; }
+
+/* ============================================================
+   VIEWER PANEL (room ID entry)
+============================================================ */
+#viewer-panel {
+  display:none; flex-direction:column; gap:10px;
+  padding:14px; background:var(--s1);
+  border:1px solid var(--border); border-radius:var(--r-md);
+  margin:0 14px 8px; flex-shrink:0;
+}
+#viewer-panel.show { display:flex; }
+#viewer-panel label { font-family:var(--font-mono); font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,215,0,0.5); }
+#viewer-panel input {
+  padding:10px 12px; background:var(--s2); color:var(--gold);
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  font-family:var(--font-mono); font-size:0.9rem; letter-spacing:0.1em;
+  outline:none; text-transform:uppercase;
+}
+#viewer-panel input:focus { border-color:var(--gold-dim); box-shadow:0 0 10px var(--gold-glow-sm); }
+#viewer-panel input::placeholder { color:rgba(255,215,0,0.2); text-transform:uppercase; }
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+============================================================ */
+#toast-stack { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:1000; display:flex; flex-direction:column-reverse; gap:6px; pointer-events:none; width:calc(100% - 28px); max-width:420px; }
+.toast {
+  padding:10px 14px; border-radius:var(--r-sm);
+  font-family:var(--font-mono); font-size:0.75rem; letter-spacing:0.08em;
+  background:rgba(14,14,14,0.95); border:1px solid var(--border);
+  backdrop-filter:blur(10px); color:var(--gold);
+  animation:toastin 0.25s ease, toastout 0.3s ease 2.7s forwards;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+}
+.toast.error { border-color:rgba(255,59,59,0.5); color:var(--red); }
+.toast.success { border-color:rgba(57,255,20,0.4); color:var(--green); }
+@keyframes toastin  { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+@keyframes toastout { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(-6px)} }
+
+/* ============================================================
+   RESPONSIVE TABLET+
+============================================================ */
+@media(min-width:600px) {
+  #ctrl-bar { flex-wrap:nowrap; }
+  #alert-bar { width:auto; flex:1; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div id="top-bar">
+    <img id="logo" src="https://i.ibb.co/gFMKLNWd/Chat-GPT-Image-Dec-31-2025-01-45-02-AM-Photoroom.png" alt="Yamassee">
+    <div id="top-right">
+      <span id="room-id-tag"></span>
+      <div id="conn-status" class="offline">
+        <div class="dot"></div>
+        <span id="conn-text">Offline</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROLE TABS -->
+  <div id="role-tabs">
+    <button class="rtab active" id="tab-camera" onclick="switchRole('camera')">📷 Room Camera</button>
+    <button class="rtab" id="tab-viewer" onclick="switchRole('viewer')">👁 Viewer</button>
+  </div>
+
+  <!-- VIEWER ROOM ENTRY PANEL -->
+  <div id="viewer-panel">
+    <label for="room-input">Enter Room ID to watch</label>
+    <input type="text" id="room-input" placeholder="ROOM-XXXX" maxlength="12">
+    <button class="ctrl-btn primary" id="join-room-btn" onclick="joinRoom()">Connect to Room</button>
+  </div>
+
+  <!-- CAMERA SECTION -->
+  <div id="cam-section">
+    <div id="cam-wrapper">
+      <!-- Video element -->
+      <video id="camera-feed" autoplay muted playsinline></video>
+      <!-- Hidden canvas for motion detection -->
+      <canvas id="motion-canvas"></canvas>
+      <!-- Placeholder -->
+      <div id="cam-placeholder">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="14" width="56" height="36" rx="6" stroke="#FFD700" stroke-width="2.5"/>
+          <circle cx="32" cy="32" r="9" stroke="#FFD700" stroke-width="2.5"/>
+          <rect x="22" y="10" width="20" height="6" rx="3" stroke="#FFD700" stroke-width="2"/>
+          <circle cx="52" cy="22" r="3" fill="#FFD700" opacity="0.6"/>
+        </svg>
+        <p id="placeholder-msg">Tap Start Camera to begin</p>
+      </div>
+      <!-- LIVE badge -->
+      <div id="live-badge"><div class="ldot"></div>LIVE</div>
+      <!-- Stats overlay -->
+      <div id="cam-stats">
+        <div class="stat-chip" id="stat-motion">MOTION: —</div>
+        <div class="stat-chip" id="stat-sound">SOUND: —</div>
+      </div>
+      <!-- Mode label -->
+      <div id="mode-label">YAMASSEE SMART MONITOR</div>
+      <!-- Alert flash overlay -->
+      <div id="alert-flash"></div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div id="ctrl-bar">
+      <button class="ctrl-btn primary" id="start-btn" onclick="startCamera()">Start Camera</button>
+      <button class="ctrl-btn danger" id="stop-btn" onclick="stopCamera()" disabled>Stop</button>
+      <div id="sens-group">
+        <div id="sens-label">Sensitivity <span id="sens-val">5</span></div>
+        <input type="range" id="sensitivity" min="1" max="10" value="5" oninput="updateSensitivity(this.value)">
+      </div>
+      <div id="alert-bar">
+        <div class="ab-dot"></div>
+        <span id="alert-text">No Alerts</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST STACK -->
+<div id="toast-stack"></div>
+
+<script>
+/* ============================================================
+   YAMASSEE SMART MONITOR - Full Application
+   
+   Architecture:
+   - WebRTC peer-to-peer video streaming
+   - WebSocket signaling server for peer negotiation
+   - Canvas-based motion detection (frame diff)
+   - Web Audio API sound detection (amplitude analysis)
+   - Alert propagation to all viewers via WebSocket
+============================================================ */
+
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const CONFIG = {
+  // Change this to your signaling server URL (ws:// or wss://)
+  // For local testing: ws://localhost:3000
+  // For production: wss://your-server.com
+  WS_URL: (() => {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${proto}//${location.hostname}:3000`;
+  })(),
+
+  ICE_SERVERS: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ],
+
+  // Motion detection
+  MOTION_THRESHOLD_BASE: 30,    // pixel diff threshold (0-255)
+  MOTION_PIXEL_PERCENT: 0.015,  // % of changed pixels to trigger alert
+  MOTION_COOLDOWN_MS: 2500,
+
+  // Sound detection
+  SOUND_THRESHOLD_BASE: 0.12,   // amplitude 0.0-1.0
+  SOUND_COOLDOWN_MS: 2000,
+
+  // Frame comparison interval (ms)
+  FRAME_INTERVAL_MS: 150,
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+const STATE = {
+  role: 'camera',           // 'camera' | 'viewer'
+  roomId: null,
+  ws: null,
+  wsReady: false,
+  localStream: null,
+  peerConnections: {},      // { [peerId]: RTCPeerConnection }
+  sensitivity: 5,
+
+  // Detection
+  motionCtx: null,
+  prevFrame: null,
+  motionTimer: null,
+  soundTimer: null,
+  audioCtx: null,
+  analyser: null,
+  lastMotionAlert: 0,
+  lastSoundAlert: 0,
+  frameLoop: null,
+
+  // Viewer
+  viewerPc: null,
+};
+
+// ─── DOM ─────────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const video       = $('camera-feed');
+const canvas      = $('motion-canvas');
+const placeholder = $('cam-placeholder');
+const liveBadge   = $('live-badge');
+const alertBar    = $('alert-bar');
+const alertText   = $('alert-text');
+const alertFlash  = $('alert-flash');
+const connStatus  = $('conn-status');
+const connText    = $('conn-text');
+const roomIdTag   = $('room-id-tag');
+const statMotion  = $('stat-motion');
+const statSound   = $('stat-sound');
+const startBtn    = $('start-btn');
+const stopBtn     = $('stop-btn');
+const modeLabel   = $('mode-label');
+const viewerPanel = $('viewer-panel');
+const sensVal     = $('sens-val');
+const sensitivity = $('sensitivity');
+
+// ─── UTILITIES ───────────────────────────────────────────────────────────────
+function genRoomId() {
+  return 'ROOM-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+}
+
+function toast(msg, type = '') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  $('toast-stack').prepend(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+function setConnStatus(state, text) {
+  connStatus.className = state;
+  connText.textContent = text;
+}
+
+function setAlert(type, message) {
+  // type: 'motion' | 'sound' | 'clear'
+  alertBar.className = type === 'clear' ? '' : `${type}-alert`;
+  alertBar.classList.add(); // force reflow
+  alertText.textContent = message;
+
+  if (type !== 'clear') {
+    alertFlash.className = type;
+    alertFlash.style.opacity = '1';
+    setTimeout(() => { alertFlash.style.opacity = '0'; alertFlash.className = ''; }, 600);
+    setTimeout(() => setAlert('clear', 'No Alerts'), 4000);
+  }
+}
+
+function updateSensitivity(val) {
+  STATE.sensitivity = parseInt(val);
+  sensVal.textContent = val;
+  // Update slider gradient
+  sensitivity.style.background = `linear-gradient(to right, var(--gold-dim) 0%, var(--gold-dim) ${val*10}%, var(--s3) ${val*10}%, var(--s3) 100%)`;
+}
+updateSensitivity(5); // init
+
+// ─── ROLE SWITCHING ──────────────────────────────────────────────────────────
+function switchRole(role) {
+  STATE.role = role;
+  $('tab-camera').classList.toggle('active', role === 'camera');
+  $('tab-viewer').classList.toggle('active', role === 'viewer');
+  viewerPanel.classList.toggle('show', role === 'viewer');
+
+  if (role === 'camera') {
+    modeLabel.textContent = 'ROOM CAMERA MODE';
+    startBtn.style.display = '';
+    stopBtn.style.display = '';
+    $('sens-group').style.display = '';
+    placeholder.querySelector('p').textContent = 'Tap Start Camera to begin';
+    stopCamera();
+  } else {
+    modeLabel.textContent = 'VIEWER MODE';
+    startBtn.style.display = 'none';
+    stopBtn.style.display = 'none';
+    stopCamera();
+    statMotion.textContent = 'MOTION: —';
+    statSound.textContent  = 'SOUND: —';
+    placeholder.querySelector('p').textContent = 'Enter a Room ID above to connect';
+    placeholder.classList.remove('hidden');
+    liveBadge.classList.remove('show');
+  }
+}
+
+// ─── WEBSOCKET SIGNALING ──────────────────────────────────────────────────────
+function connectWS(onOpen) {
+  if (STATE.ws && STATE.ws.readyState === WebSocket.OPEN) {
+    onOpen && onOpen();
+    return;
+  }
+
+  try {
+    STATE.ws = new WebSocket(CONFIG.WS_URL);
+  } catch(e) {
+    toast('⚠ Could not connect to signaling server. Running in local-only mode.', 'error');
+    onOpen && onOpen(); // allow camera to start without server
+    return;
+  }
+
+  STATE.ws.onopen = () => {
+    STATE.wsReady = true;
+    toast('✓ Signaling server connected', 'success');
+    onOpen && onOpen();
+  };
+
+  STATE.ws.onclose = () => {
+    STATE.wsReady = false;
+    setConnStatus('offline', 'Offline');
+    toast('Signaling server disconnected', 'error');
+    // Auto-reconnect after 3s
+    setTimeout(() => {
+      if (STATE.localStream || STATE.role === 'viewer') connectWS();
+    }, 3000);
+  };
+
+  STATE.ws.onerror = () => {
+    // silently handled by onclose
+    toast('⚠ Server unreachable – local preview only', '');
+  };
+
+  STATE.ws.onmessage = async (event) => {
+    let msg;
+    try { msg = JSON.parse(event.data); } catch { return; }
+    await handleSignal(msg);
+  };
+}
+
+async function handleSignal(msg) {
+  // Messages: room-created, viewer-joined, offer, answer, ice, alert, viewer-left
+  switch(msg.type) {
+
+    case 'room-created':
+      STATE.roomId = msg.roomId;
+      roomIdTag.textContent = msg.roomId;
+      toast(`✓ Room ${msg.roomId} created`, 'success');
+      setConnStatus('live', 'Broadcasting');
+      break;
+
+    case 'viewer-joined':
+      // A viewer connected — send them an offer
+      toast('👁 Viewer connected', 'success');
+      await createOfferFor(msg.viewerId);
+      break;
+
+    case 'viewer-left':
+      if (STATE.peerConnections[msg.viewerId]) {
+        STATE.peerConnections[msg.viewerId].close();
+        delete STATE.peerConnections[msg.viewerId];
+      }
+      toast('Viewer disconnected', '');
+      break;
+
+    case 'offer':
+      // Viewer receives offer from camera
+      await handleOffer(msg);
+      break;
+
+    case 'answer':
+      // Camera receives answer from viewer
+      if (STATE.peerConnections[msg.from]) {
+        await STATE.peerConnections[msg.from].setRemoteDescription(new RTCSessionDescription(msg.sdp));
+      }
+      break;
+
+    case 'ice':
+      // ICE candidate from peer
+      const pc = STATE.role === 'camera'
+        ? STATE.peerConnections[msg.from]
+        : STATE.viewerPc;
+      if (pc) {
+        try { await pc.addIceCandidate(new RTCIceCandidate(msg.candidate)); } catch(e) {}
+      }
+      break;
+
+    case 'alert':
+      // Viewer receives alert from camera room
+      if (STATE.role === 'viewer') {
+        setAlert(msg.alertType, msg.message);
+        toast(`🔔 ${msg.message}`, msg.alertType === 'sound' ? 'error' : '');
+      }
+      break;
+
+    case 'error':
+      toast(`⚠ ${msg.message}`, 'error');
+      break;
+  }
+}
+
+function wsSend(obj) {
+  if (STATE.ws && STATE.ws.readyState === WebSocket.OPEN) {
+    STATE.ws.send(JSON.stringify(obj));
+  }
+}
+
+// ─── CAMERA MODE ─────────────────────────────────────────────────────────────
+async function startCamera() {
+  startBtn.disabled = true;
+  setConnStatus('connecting', 'Starting...');
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    STATE.localStream = stream;
+    video.srcObject = stream;
+    video.onloadedmetadata = () => {
+      placeholder.classList.add('hidden');
+      liveBadge.classList.add('show');
+      stopBtn.disabled = false;
+      startBtn.textContent = 'Restart';
+      startBtn.disabled = false;
+      modeLabel.textContent = 'ROOM CAMERA MODE';
+
+      // Setup detection
+      setupMotionDetection();
+      setupSoundDetection();
+
+      // Connect to signaling server and create room
+      connectWS(() => {
+        if (STATE.wsReady) {
+          STATE.roomId = STATE.roomId || genRoomId();
+          wsSend({ type: 'create-room', roomId: STATE.roomId });
+        } else {
+          // No server — local only
+          STATE.roomId = genRoomId();
+          roomIdTag.textContent = STATE.roomId;
+          setConnStatus('live', 'Local Preview');
+          toast('Camera active (no signaling server)', '');
+        }
+      });
+    };
+  } catch(err) {
+    startBtn.disabled = false;
+    setConnStatus('offline', 'Offline');
+    toast('⚠ Camera access denied or unavailable', 'error');
+    console.error(err);
+    placeholder.querySelector('p').textContent = 'Camera access denied';
+  }
+}
+
+function stopCamera() {
+  if (STATE.localStream) {
+    STATE.localStream.getTracks().forEach(t => t.stop());
+    STATE.localStream = null;
+  }
+  video.srcObject = null;
+  liveBadge.classList.remove('show');
+  placeholder.classList.remove('hidden');
+  startBtn.disabled = false;
+  startBtn.textContent = 'Start Camera';
+  stopBtn.disabled = true;
+
+  // Stop detection loops
+  cancelAnimationFrame(STATE.frameLoop);
+  if (STATE.audioCtx) { STATE.audioCtx.close(); STATE.audioCtx = null; }
+  STATE.prevFrame = null;
+
+  // Close peer connections
+  Object.values(STATE.peerConnections).forEach(pc => pc.close());
+  STATE.peerConnections = {};
+
+  if (STATE.wsReady) wsSend({ type: 'leave-room', roomId: STATE.roomId });
+  setConnStatus('offline', 'Offline');
+  roomIdTag.textContent = '';
+  STATE.roomId = null;
+  setAlert('clear', 'No Alerts');
+  statMotion.textContent = 'MOTION: —';
+  statSound.textContent  = 'SOUND: —';
+}
+
+// ─── WebRTC: CAMERA → VIEWERS ─────────────────────────────────────────────────
+async function createOfferFor(viewerId) {
+  const pc = new RTCPeerConnection({ iceServers: CONFIG.ICE_SERVERS });
+  STATE.peerConnections[viewerId] = pc;
+
+  // Add local tracks
+  STATE.localStream.getTracks().forEach(track => pc.addTrack(track, STATE.localStream));
+
+  pc.onicecandidate = e => {
+    if (e.candidate) {
+      wsSend({ type: 'ice', to: viewerId, from: 'camera', candidate: e.candidate });
+    }
+  };
+
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+      pc.close();
+      delete STATE.peerConnections[viewerId];
+    }
+  };
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  wsSend({ type: 'offer', to: viewerId, from: 'camera', sdp: pc.localDescription });
+}
+
+// ─── WebRTC: VIEWER ───────────────────────────────────────────────────────────
+async function joinRoom() {
+  const roomId = $('room-input').value.trim().toUpperCase();
+  if (!roomId) { toast('Enter a Room ID', 'error'); return; }
+
+  $('join-room-btn').disabled = true;
+  setConnStatus('connecting', 'Connecting...');
+  placeholder.querySelector('p').textContent = 'Connecting to room...';
+
+  connectWS(() => {
+    if (!STATE.wsReady) {
+      toast('⚠ Cannot connect — signaling server unavailable', 'error');
+      $('join-room-btn').disabled = false;
+      setConnStatus('offline', 'Offline');
+      return;
+    }
+    STATE.roomId = roomId;
+    wsSend({ type: 'join-room', roomId });
+    $('join-room-btn').disabled = false;
+  });
+}
+
+async function handleOffer(msg) {
+  // Viewer handles incoming offer from camera
+  const pc = new RTCPeerConnection({ iceServers: CONFIG.ICE_SERVERS });
+  STATE.viewerPc = pc;
+
+  pc.ontrack = e => {
+    if (e.streams && e.streams[0]) {
+      video.srcObject = e.streams[0];
+      placeholder.classList.add('hidden');
+      liveBadge.classList.add('show');
+      setConnStatus('viewer-live', 'Watching');
+      modeLabel.textContent = `WATCHING: ${STATE.roomId}`;
+      toast(`✓ Connected to ${STATE.roomId}`, 'success');
+    }
+  };
+
+  pc.onicecandidate = e => {
+    if (e.candidate) {
+      wsSend({ type: 'ice', to: msg.from, from: 'viewer', candidate: e.candidate, roomId: STATE.roomId });
+    }
+  };
+
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+      setConnStatus('offline', 'Disconnected');
+      placeholder.classList.remove('hidden');
+      placeholder.querySelector('p').textContent = 'Connection lost. Try reconnecting.';
+      liveBadge.classList.remove('show');
+      video.srcObject = null;
+      toast('Connection to camera lost', 'error');
+    }
+  };
+
+  await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  wsSend({ type: 'answer', to: msg.from, from: 'viewer', sdp: pc.localDescription, roomId: STATE.roomId });
+}
+
+// ─── MOTION DETECTION ────────────────────────────────────────────────────────
+function setupMotionDetection() {
+  canvas.width  = 160; // low-res for performance
+  canvas.height = 120;
+  STATE.motionCtx = canvas.getContext('2d', { willReadFrequently: true });
+  STATE.prevFrame = null;
+  detectMotionFrame();
+}
+
+function detectMotionFrame() {
+  if (!STATE.localStream) return;
+
+  STATE.frameLoop = requestAnimationFrame(() => {
+    setTimeout(detectMotionFrame, CONFIG.FRAME_INTERVAL_MS);
+  });
+
+  if (video.readyState < 2) return;
+
+  const ctx = STATE.motionCtx;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+  if (STATE.prevFrame) {
+    const data1 = STATE.prevFrame.data;
+    const data2 = current.data;
+    let changedPixels = 0;
+    const total = data1.length / 4;
+
+    // Sensitivity scales threshold inversely: high sensitivity = lower threshold
+    const sens = STATE.sensitivity;
+    const threshold = CONFIG.MOTION_THRESHOLD_BASE * (1 - (sens - 1) / 12);
+
+    for (let i = 0; i < data1.length; i += 4) {
+      const dr = Math.abs(data1[i]   - data2[i]);
+      const dg = Math.abs(data1[i+1] - data2[i+1]);
+      const db = Math.abs(data1[i+2] - data2[i+2]);
+      if ((dr + dg + db) / 3 > threshold) changedPixels++;
+    }
+
+    const changeRatio = changedPixels / total;
+    // Sensitivity also scales the trigger percent
+    const triggerPercent = CONFIG.MOTION_PIXEL_PERCENT * (1 - (sens - 1) / 14);
+    const level = Math.min(100, Math.round(changeRatio * 4000));
+
+    statMotion.textContent = `MOTION: ${level}%`;
+    statMotion.classList.toggle('hot', level > 25);
+
+    const now = Date.now();
+    if (changeRatio > triggerPercent && now - STATE.lastMotionAlert > CONFIG.MOTION_COOLDOWN_MS) {
+      STATE.lastMotionAlert = now;
+      triggerAlert('motion', '⚡ Motion Detected');
+    }
+  }
+
+  STATE.prevFrame = current;
+}
+
+// ─── SOUND DETECTION ─────────────────────────────────────────────────────────
+function setupSoundDetection() {
+  try {
+    STATE.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source   = STATE.audioCtx.createMediaStreamSource(STATE.localStream);
+    STATE.analyser = STATE.audioCtx.createAnalyser();
+    STATE.analyser.fftSize = 512;
+    source.connect(STATE.analyser);
+    soundLoop();
+  } catch(e) {
+    console.warn('Audio detection unavailable:', e);
+  }
+}
+
+function soundLoop() {
+  if (!STATE.audioCtx) return;
+  requestAnimationFrame(soundLoop);
+
+  const data = new Uint8Array(STATE.analyser.frequencyBinCount);
+  STATE.analyser.getByteFrequencyData(data);
+
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) sum += data[i];
+  const avg = sum / data.length / 255; // 0.0-1.0
+
+  const level = Math.min(100, Math.round(avg * 400));
+  statSound.textContent = `SOUND: ${level}%`;
+  statSound.classList.toggle('hot', level > 30);
+
+  const sens = STATE.sensitivity;
+  const threshold = CONFIG.SOUND_THRESHOLD_BASE * (1 - (sens - 1) / 13);
+  const now = Date.now();
+
+  if (avg > threshold && now - STATE.lastSoundAlert > CONFIG.SOUND_COOLDOWN_MS) {
+    STATE.lastSoundAlert = now;
+    triggerAlert('sound', '🔊 Sound Detected');
+  }
+}
+
+// ─── ALERT TRIGGER ───────────────────────────────────────────────────────────
+function triggerAlert(type, message) {
+  setAlert(type, message);
+  toast(`🔔 ${message}`, type === 'sound' ? 'error' : '');
+
+  // Broadcast to viewers via WS
+  if (STATE.wsReady && STATE.roomId) {
+    wsSend({
+      type: 'alert',
+      roomId: STATE.roomId,
+      alertType: type,
+      message
+    });
+  }
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+switchRole('camera');
+</script>
+</body>
+</html>
