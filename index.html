@@ -383,6 +383,9 @@ body::after {
         <div class="stat-chip" id="stat-motion">MOTION: —</div>
         <div class="stat-chip" id="stat-sound">SOUND: —</div>
       </div>
+      <!-- Room ID overlay — centered top of camera feed -->
+      <div id="room-id-overlay" style="display:none;position:absolute;top:14px;left:50%;transform:translateX(-50%);font-family:'Share Tech Mono',monospace;font-size:1.1rem;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#FFD700;background:rgba(0,0,0,0.68);backdrop-filter:blur(8px);padding:6px 20px;border-radius:20px;border:1px solid rgba(255,215,0,0.45);box-shadow:0 0 18px rgba(255,215,0,0.2);z-index:7;white-space:nowrap;pointer-events:none;text-shadow:0 0 12px rgba(255,215,0,0.6);">—</div>
+
       <!-- Mode label -->
       <div id="mode-label">YAMASSEE SMART MONITOR</div>
       <!-- Alert flash overlay -->
@@ -501,11 +504,17 @@ const bannerRoomId  = $('banner-room-id');
 function showRoomBanner(roomId) {
   bannerRoomId.textContent = roomId;
   roomIdBanner.classList.add('show');
+  const overlay = document.getElementById('room-id-overlay');
+  overlay.textContent = roomId;
+  overlay.style.display = 'block';
 }
 
 function hideRoomBanner() {
   roomIdBanner.classList.remove('show');
   bannerRoomId.textContent = '—';
+  const overlay = document.getElementById('room-id-overlay');
+  overlay.style.display = 'none';
+  overlay.textContent = '—';
 }
 
 function copyRoomId() {
