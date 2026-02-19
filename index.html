@@ -467,14 +467,19 @@ async function doConnect() {
     pc = new RTCPeerConnection(ICE_CFG);
 
     pc.ontrack = e => {
-      if (e.streams && e.streams[0]) {
+      // ontrack fires for each track — grab the stream on any call
+      const s = e.streams && e.streams[0] ? e.streams[0] : (feed.srcObject || new MediaStream([e.track]));
+      if (!feed.srcObject || !feed.srcObject.getVideoTracks().length) {
         feed.muted = false;
-        feed.srcObject = e.streams[0];
+        feed.srcObject = s;
+        feed.play().catch(() => {});
+      }
+      if (e.track.kind === 'video') {
         hideEmpty();
         livebdg.style.display = 'flex';
         setStat('watch', 'Watching');
         toast('✓ Live feed connected!', 'ok');
-        startDetect(e.streams[0]);
+        startDetect(s);
       }
     };
 
@@ -500,7 +505,10 @@ async function doConnect() {
       enc(pc.localDescription),
       false
     );
-    showEmpty('Send the Answer code to the Camera device\nVideo will appear here once connected');
+    // Only show placeholder if video not already playing
+    if (!feed.srcObject) {
+      showEmpty('Send the Answer code to the Camera device\nVideo will appear here once connected');
+    }
     setStat('busy', 'Waiting for camera...');
     toast('Copy the Answer code and send it back to camera', '');
   }
