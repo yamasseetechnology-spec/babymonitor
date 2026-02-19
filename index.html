@@ -286,20 +286,33 @@ function setSens(v) {
 }
 setSens(5);
 
-// ── ENCODE / DECODE — safe base64 that survives copy-paste ────
-function enc(obj) {
-  // Pull out only what we need — avoids non-enumerable property issues
+// ── ENCODE / DECODE — compressed with native CompressionStream (~70% shorter) ──
+async function enc(obj) {
   const data = { type: obj.type, sdp: obj.sdp };
-  const str  = JSON.stringify(data);
-  // Convert to base64 safely (handles unicode)
-  return btoa(String.fromCharCode(...new TextEncoder().encode(str)));
+  const bytes = new TextEncoder().encode(JSON.stringify(data));
+  // Compress using built-in browser API
+  const cs = new CompressionStream('deflate-raw');
+  const writer = cs.writable.getWriter();
+  writer.write(bytes); writer.close();
+  const chunks = []; const reader = cs.readable.getReader();
+  while (true) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); }
+  const compressed = new Uint8Array(chunks.reduce((a,c) => a+c.length, 0));
+  let off = 0; for (const c of chunks) { compressed.set(c, off); off += c.length; }
+  // Base64 encode — URL-safe chars only so copy-paste never breaks it
+  return btoa(String.fromCharCode(...compressed)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
 }
-function dec(raw) {
-  // Strip ALL whitespace — handles accidental newlines from copy-paste
-  const clean = raw.replace(/\s/g, '');
-  // Decode base64 back to string
-  const str   = new TextDecoder().decode(Uint8Array.from(atob(clean), c => c.charCodeAt(0)));
-  const obj   = JSON.parse(str);
+async function dec(raw) {
+  const clean = raw.trim().replace(/\s/g,'').replace(/-/g,'+').replace(/_/g,'/');
+  const pad = clean + '=='.slice(0, (4 - clean.length % 4) % 4);
+  const compressed = Uint8Array.from(atob(pad), c => c.charCodeAt(0));
+  const ds = new DecompressionStream('deflate-raw');
+  const writer = ds.writable.getWriter();
+  writer.write(compressed); writer.close();
+  const chunks = []; const reader = ds.readable.getReader();
+  while (true) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); }
+  const bytes = new Uint8Array(chunks.reduce((a,c) => a+c.length, 0));
+  let off = 0; for (const c of chunks) { bytes.set(c, off); off += c.length; }
+  const obj = JSON.parse(new TextDecoder().decode(bytes));
   if (!obj.type || !obj.sdp) throw new Error('Bad code');
   return obj;
 }
@@ -429,7 +442,7 @@ async function startCam() {
   // Show offer code
   sigShow(
     '📋 Step 1: Copy this code → send to Viewer device\n⏳ Step 2: Paste their Answer code below when you get it back',
-    enc(pc.localDescription),
+    await enc(pc.localDescription),
     true
   );
   toast('Copy the Offer code and send it to the Viewer', '');
@@ -441,7 +454,7 @@ async function doConnect() {
   if (!raw) { toast('Paste a code first', 'err'); return; }
 
   let data;
-  try { data = dec(raw); }
+  try { data = await dec(raw); }
   catch(e) { toast('Invalid code — copy it again carefully', 'err'); return; }
 
   // ── CAMERA side: receiving viewer's Answer ──
@@ -507,7 +520,7 @@ async function doConnect() {
     sigShow(
       '📋 Copy this Answer code → send back to Camera device
 Then paste it into the camera and tap Go ▶',
-      enc(pc.localDescription),
+      await enc(pc.localDescription),
       false
     );
     setStat('busy', 'Waiting for camera...');
