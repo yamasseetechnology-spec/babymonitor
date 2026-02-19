@@ -19,6 +19,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--gold);fon
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(0,0,0,0.05) 3px,rgba(0,0,0,0.05) 4px);}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+
+/* TOP BAR */
 #top-bar{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;
   background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;}
 #top-bar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
@@ -32,57 +34,77 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 #status.live .dot{background:var(--green);box-shadow:0 0 8px var(--green-glow);animation:pulse 1.5s infinite;}
 #status.watch{color:#7DF9FF;border-color:rgba(125,249,255,0.3);}
 #status.watch .dot{background:#7DF9FF;box-shadow:0 0 8px rgba(125,249,255,0.4);animation:pulse 1.5s infinite;}
-#status.busy{color:var(--gold);}
 #status.busy .dot{background:var(--gold);animation:pulse 0.8s infinite;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.6)}}
+
+/* TABS */
 #tabs{display:flex;gap:6px;padding:7px 14px;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
 .tab{flex:1;padding:7px 8px;font-family:var(--ui);font-size:0.82rem;font-weight:600;letter-spacing:0.07em;
   text-transform:uppercase;background:var(--s2);color:rgba(255,215,0,0.45);border:1px solid var(--border);
   border-radius:8px;cursor:pointer;transition:all 0.2s;min-height:44px;}
 .tab.on{background:rgba(255,215,0,0.08);color:var(--gold);border-color:var(--gold-dim);box-shadow:0 0 14px rgba(255,215,0,0.1);}
 .tab:hover:not(.on){background:var(--s3);color:var(--gold);}
+
+/* SIGNAL PANEL */
 #signal{display:none;flex-direction:column;gap:6px;padding:10px 14px;
   background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
 #signal.show{display:flex;}
-#sig-step{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;color:rgba(255,215,0,0.6);line-height:1.6;padding:4px 0;}
-#signal textarea{background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;
-  font-family:var(--mono);font-size:0.65rem;padding:8px 10px;resize:none;outline:none;
-  height:68px;line-height:1.5;word-break:break-all;width:100%;}
-#signal textarea:focus{border-color:var(--gold-dim);}
-#signal textarea::placeholder{color:rgba(255,215,0,0.2);}
-.srow{display:flex;gap:6px;}
+#sig-step{font-family:var(--mono);font-size:0.64rem;letter-spacing:0.07em;color:rgba(255,215,0,0.65);line-height:1.6;}
+.slabel{font-family:var(--mono);font-size:0.63rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,215,0,0.45);margin-top:2px;}
+.srow{display:flex;gap:6px;align-items:stretch;}
+.srow textarea{flex:1;background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;
+  font-family:var(--mono);font-size:0.64rem;padding:8px 10px;resize:none;outline:none;
+  height:62px;line-height:1.5;word-break:break-all;}
+.srow textarea:focus{border-color:var(--gold-dim);}
+.srow textarea::placeholder{color:rgba(255,215,0,0.18);}
 .sbtn{padding:8px 14px;font-family:var(--ui);font-size:0.8rem;font-weight:700;letter-spacing:0.06em;
   text-transform:uppercase;background:rgba(255,215,0,0.1);color:var(--gold);
-  border:1px solid rgba(255,215,0,0.4);border-radius:6px;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
-.sbtn:hover{background:rgba(255,215,0,0.22);}
+  border:1px solid rgba(255,215,0,0.4);border-radius:8px;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;align-self:stretch;}
+.sbtn:hover{background:rgba(255,215,0,0.2);}
 .sbtn.green{background:rgba(57,255,20,0.08);border-color:rgba(57,255,20,0.4);color:var(--green);}
 .sbtn.green:hover{background:rgba(57,255,20,0.18);}
+
+/* VIDEO SECTION */
 #cam-section{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 14px 6px;}
 #cam-wrap{flex:1;min-height:0;position:relative;border-radius:20px;overflow:hidden;
-  border:1px solid var(--border);background:var(--s1);box-shadow:inset 0 0 35px rgba(255,215,0,0.04),0 0 40px rgba(0,0,0,0.7);}
+  border:1px solid var(--border);background:#000;}
 #cam-wrap::before,#cam-wrap::after{content:'';position:absolute;width:18px;height:18px;
-  border-color:rgba(255,215,0,0.5);border-style:solid;z-index:6;pointer-events:none;}
+  border-color:rgba(255,215,0,0.5);border-style:solid;z-index:10;pointer-events:none;}
 #cam-wrap::before{top:10px;left:10px;border-width:2px 0 0 2px;border-radius:3px 0 0 0;}
 #cam-wrap::after{bottom:10px;right:10px;border-width:0 2px 2px 0;border-radius:0 0 3px 0;}
-#feed{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;border-radius:20px;background:#000;z-index:1;}
-#mcanvas{display:none;position:absolute;inset:0;z-index:1;}
-#empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:14px;border-radius:20px;background:var(--s1);z-index:2;}
+
+/* VIDEO — always fills wrap */
+#feed{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:20px;background:#000;z-index:1;display:block;}
+#mcanvas{position:absolute;top:0;left:0;width:0;height:0;z-index:0;visibility:hidden;}
+
+/* PLACEHOLDER — shown over video when no stream */
+#empty{position:absolute;top:0;left:0;width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  border-radius:20px;background:var(--s1);z-index:5;}
+#empty.hidden{display:none !important;}
 #empty svg{opacity:0.13;width:56px;height:56px;}
-#empty p{font-family:var(--mono);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;
+#emsg{font-family:var(--mono);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;
   color:rgba(255,215,0,0.28);text-align:center;padding:0 24px;line-height:1.9;}
+
+/* LIVE BADGE */
 #livebadge{position:absolute;bottom:14px;left:14px;display:none;align-items:center;gap:6px;
-  background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);border:1px solid rgba(255,59,59,0.5);
-  border-radius:8px;padding:4px 10px;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.14em;color:#fff;z-index:6;}
+  background:rgba(0,0,0,0.78);backdrop-filter:blur(6px);border:1px solid rgba(255,59,59,0.5);
+  border-radius:8px;padding:4px 10px;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.14em;color:#fff;z-index:8;}
 #livebadge .ldot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 7px var(--red-glow);animation:blink 1.2s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.1}}
-#stats{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;z-index:6;pointer-events:none;}
-.chip{background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);border:1px solid var(--border);
+
+/* STATS */
+#stats{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;z-index:8;pointer-events:none;}
+.chip{background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);border:1px solid var(--border);
   border-radius:6px;padding:3px 8px;font-family:var(--mono);font-size:0.62rem;letter-spacing:0.09em;color:rgba(255,215,0,0.5);}
 .chip.hot{border-color:rgba(255,59,59,0.5);color:var(--red);background:rgba(255,59,59,0.12);}
-#flash{position:absolute;inset:0;border-radius:20px;pointer-events:none;z-index:5;opacity:0;transition:opacity 0.1s;}
-#flash.motion{background:radial-gradient(ellipse at center,rgba(255,215,0,0.1) 0%,transparent 70%);border:2px solid rgba(255,215,0,0.35);border-radius:20px;}
-#flash.sound{background:radial-gradient(ellipse at center,rgba(255,59,59,0.1) 0%,transparent 70%);border:2px solid rgba(255,59,59,0.35);border-radius:20px;}
+
+/* ALERT FLASH */
+#flash{position:absolute;inset:0;border-radius:20px;pointer-events:none;z-index:7;opacity:0;transition:opacity 0.1s;}
+#flash.motion{background:radial-gradient(ellipse at center,rgba(255,215,0,0.12) 0%,transparent 70%);border:2px solid rgba(255,215,0,0.4);}
+#flash.sound{background:radial-gradient(ellipse at center,rgba(255,59,59,0.12) 0%,transparent 70%);border:2px solid rgba(255,59,59,0.4);}
+
+/* CONTROLS */
 #ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0 4px;flex-shrink:0;}
 .btn{padding:0 16px;height:44px;font-family:var(--ui);font-size:0.88rem;font-weight:700;
   letter-spacing:0.08em;text-transform:uppercase;background:var(--s2);color:var(--gold);
@@ -96,8 +118,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 #senslbl{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;
   color:rgba(255,215,0,0.45);display:flex;justify-content:space-between;}
 #senslbl span{color:var(--gold);}
-#sens{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;
-  background:linear-gradient(to right,var(--gold-dim) 50%,var(--s3) 50%);outline:none;cursor:pointer;}
+#sens{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;}
 #sens::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
   background:var(--gold);border:2px solid var(--bg);box-shadow:0 0 8px var(--gold-glow);cursor:pointer;}
 #alertbar{width:100%;padding:7px 12px;background:var(--s2);border:1px solid var(--border);
@@ -108,6 +129,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 #alertbar.motion-alert .adot{background:var(--gold);box-shadow:0 0 8px var(--gold-glow);animation:pulse 0.8s infinite;}
 #alertbar.sound-alert{border-color:rgba(255,59,59,0.5);color:var(--red);background:rgba(255,59,59,0.07);}
 #alertbar.sound-alert .adot{background:var(--red);box-shadow:0 0 8px var(--red-glow);animation:pulse 0.8s infinite;}
+
+/* TOASTS */
 #toasts{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:1000;
   display:flex;flex-direction:column-reverse;gap:6px;pointer-events:none;width:calc(100% - 28px);max-width:420px;}
 .toast{padding:10px 14px;border-radius:8px;font-family:var(--mono);font-size:0.75rem;
@@ -117,7 +140,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .toast.err{border-color:rgba(255,59,59,0.5);color:var(--red);}
 .toast.ok{border-color:rgba(57,255,20,0.4);color:var(--green);}
 @keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes tout{from{opacity:1}to{opacity:0;transform:translateY(-4px)}}
+@keyframes tout{from{opacity:1}to{opacity:0}}
 @media(min-width:600px){#ctrl{flex-wrap:nowrap;}#alertbar{width:auto;flex:1;}}
 </style>
 </head>
@@ -125,31 +148,48 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 <div id="app">
   <div id="top-bar">
     <img id="logo" src="https://i.ibb.co/gFMKLNWd/Chat-GPT-Image-Dec-31-2025-01-45-02-AM-Photoroom.png" alt="Yamassee">
-    <div id="status" class="off"><div class="dot"></div><span id="stxt">Offline</span></div>
+    <div id="status"><div class="dot"></div><span id="stxt">Offline</span></div>
   </div>
+
   <div id="tabs">
     <button class="tab on" id="tcam" onclick="setRole('camera')">📷 Room Camera</button>
     <button class="tab" id="tview" onclick="setRole('viewer')">👁 Viewer</button>
   </div>
+
+  <!-- Signal panel: BOTH boxes always visible on both tabs -->
   <div id="signal">
-    <div id="sig-step"></div>
-    <label id="lout" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,215,0,0.5);display:none;">Your Code (copy this):</label>
-    <div class="srow">
-      <textarea id="tout" readonly onclick="this.select()" style="display:none" placeholder="Code will appear here..."></textarea>
-      <button class="sbtn" id="bcopy" onclick="doCopy()" style="display:none">📋 Copy</button>
-    </div>
-    <label id="lin" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,215,0,0.5);display:none;">Paste Code Here:</label>
-    <div class="srow" id="inrow" style="display:none">
-      <textarea id="tin" onclick="this.select()" placeholder="Paste code here..."></textarea>
-      <button class="sbtn green" onclick="doConnect()">Go ▶</button>
+    <div id="sig-step" style="margin-bottom:4px"></div>
+    <div style="display:flex;gap:8px;align-items:stretch;">
+      <!-- LEFT: your generated code -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+        <div class="slabel" id="lbl-out">Step 1 — Your code (copy this):</div>
+        <div class="srow">
+          <textarea id="tout" readonly onclick="this.select()" placeholder="Start Camera to generate code..."></textarea>
+          <button class="sbtn" onclick="doCopy()">📋</button>
+        </div>
+      </div>
+      <!-- RIGHT: paste their code -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+        <div class="slabel" id="lbl-in">Step 2 — Paste their code:</div>
+        <div class="srow">
+          <textarea id="tin" onclick="this.select()" placeholder="Paste code from other device..."></textarea>
+          <button class="sbtn green" onclick="doConnect()">Go ▶</button>
+        </div>
+      </div>
     </div>
   </div>
+
   <div id="cam-section">
     <div id="cam-wrap">
-      <video id="feed" autoplay playsinline></video>
+      <video id="feed" autoplay playsinline muted></video>
       <canvas id="mcanvas"></canvas>
       <div id="empty">
-        <svg viewBox="0 0 64 64" fill="none"><rect x="4" y="14" width="56" height="36" rx="6" stroke="#FFD700" stroke-width="2.5"/><circle cx="32" cy="32" r="9" stroke="#FFD700" stroke-width="2.5"/><rect x="22" y="10" width="20" height="6" rx="3" stroke="#FFD700" stroke-width="2"/><circle cx="52" cy="22" r="3" fill="#FFD700" opacity="0.6"/></svg>
+        <svg viewBox="0 0 64 64" fill="none">
+          <rect x="4" y="14" width="56" height="36" rx="6" stroke="#FFD700" stroke-width="2.5"/>
+          <circle cx="32" cy="32" r="9" stroke="#FFD700" stroke-width="2.5"/>
+          <rect x="22" y="10" width="20" height="6" rx="3" stroke="#FFD700" stroke-width="2"/>
+          <circle cx="52" cy="22" r="3" fill="#FFD700" opacity="0.6"/>
+        </svg>
         <p id="emsg">Tap Start Camera to begin</p>
       </div>
       <div id="livebadge"><div class="ldot"></div>LIVE</div>
@@ -175,227 +215,226 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 <script>
 /*
   YAMASSEE SMART MONITOR
-  Zero servers. Zero accounts. Pure WebRTC.
+  No servers. No accounts. Pure WebRTC + manual signaling.
 
-  CAMERA: Start Camera → Copy Offer code → send to Viewer
-  VIEWER: Paste Offer → tap Go → Copy Answer code → send to Camera
-  CAMERA: Paste Answer → tap Go → LIVE
+  CAMERA side:
+    1. Tap Start Camera
+    2. Copy the Offer code → send to Viewer (text/airdrop/etc)
+    3. Paste the Answer code you get back → tap Go
+    4. Live!
+
+  VIEWER side:
+    1. Switch to Viewer tab
+    2. Paste the Offer code from Camera → tap Go
+    3. Copy the Answer code → send back to Camera
+    4. Video appears automatically once Camera pastes it
 */
 
-const ICE_CFG = { iceServers: [
+var ICE = { iceServers: [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
   { urls: 'stun:stun2.l.google.com:19302' },
   { urls: 'stun:stun3.l.google.com:19302' },
-  { urls: 'turn:openrelay.metered.ca:80',               username: 'openrelayproject', credential: 'openrelayproject' },
-  { urls: 'turn:openrelay.metered.ca:443',              username: 'openrelayproject', credential: 'openrelayproject' },
-  { urls: 'turn:openrelay.metered.ca:443?transport=tcp',username: 'openrelayproject', credential: 'openrelayproject' }
+  { urls: 'turn:openrelay.metered.ca:80',                username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443',               username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
 ]};
 
-const G = id => document.getElementById(id);
-const feed     = G('feed');
-const mcanvas  = G('mcanvas');
-const empty    = G('empty');
-const emsg     = G('emsg');
-const livebdg  = G('livebadge');
-const flashEl  = G('flash');
-const status   = G('status');
-const stxt     = G('stxt');
-const smot     = G('smot');
-const ssnd     = G('ssnd');
-const alrt     = G('alrt');
-const alertbar = G('alertbar');
-const bstart   = G('bstart');
-const bstop    = G('bstop');
-const signal   = G('signal');
-const sigstep  = G('sig-step');
-const tout     = G('tout');
-const tin      = G('tin');
-const lout     = G('lout');
-const lin      = G('lin');
-const inrow    = G('inrow');
-const bcopy    = G('bcopy');
+// DOM refs
+var feed      = document.getElementById('feed');
+var mcanvas   = document.getElementById('mcanvas');
+var empty     = document.getElementById('empty');
+var emsg      = document.getElementById('emsg');
+var livebadge = document.getElementById('livebadge');
+var flashEl   = document.getElementById('flash');
+var statusEl  = document.getElementById('status');
+var stxt      = document.getElementById('stxt');
+var smot      = document.getElementById('smot');
+var ssnd      = document.getElementById('ssnd');
+var alrt      = document.getElementById('alrt');
+var alertbar  = document.getElementById('alertbar');
+var bstart    = document.getElementById('bstart');
+var bstop     = document.getElementById('bstop');
+var signal    = document.getElementById('signal');
+var sigstep   = document.getElementById('sig-step');
+var tout      = document.getElementById('tout');
+var tin       = document.getElementById('tin');
 
-let ROLE     = 'camera';
-let pc       = null;
-let stream   = null;
-let sens     = 5;
-let mctx     = null;
-let prev     = null;
-let floop    = null;
-let actx     = null;
-let analyser = null;
-let tLM      = 0;
-let tLS      = 0;
+// State
+var ROLE     = 'camera';
+var pc       = null;
+var stream   = null;
+var sens     = 5;
+var mctx     = null;
+var prev     = null;
+var floop    = null;
+var actx     = null;
+var analyser = null;
+var tLM      = 0;
+var tLS      = 0;
+
+// ── HELPERS ──────────────────────────────────────────────────
 
 function toast(msg, cls) {
-  cls = cls || '';
   var d = document.createElement('div');
-  d.className = 'toast ' + cls;
+  d.className = 'toast ' + (cls || '');
   d.textContent = msg;
-  G('toasts').prepend(d);
-  setTimeout(function() { d.remove(); }, 3200);
+  document.getElementById('toasts').prepend(d);
+  setTimeout(function() { if (d.parentNode) d.parentNode.removeChild(d); }, 3200);
 }
 
-function setStat(cls, txt) { status.className = cls; stxt.textContent = txt; }
+function setStat(cls, txt) {
+  statusEl.className = cls || '';
+  stxt.textContent = txt;
+}
 
 function showEmpty(msg) {
   emsg.textContent = msg;
-  empty.style.visibility = 'visible';
-  empty.style.display = 'flex';
-  empty.style.zIndex = '2';
+  empty.classList.remove('hidden');
 }
 
 function hideEmpty() {
-  empty.style.visibility = 'hidden';
-  empty.style.display = 'none';
-  empty.style.zIndex = '-1';
+  empty.classList.add('hidden');
 }
 
 function setAlert(type, msg) {
-  alertbar.className = type === 'clear' ? '' : type + '-alert';
-  alrt.textContent = msg;
-  if (type !== 'clear') {
+  if (type === 'clear') {
+    alertbar.className = '';
+    alrt.textContent = 'No Alerts';
+  } else {
+    alertbar.className = type + '-alert';
+    alrt.textContent = msg;
     flashEl.className = type;
     flashEl.style.opacity = '1';
     setTimeout(function() { flashEl.style.opacity = '0'; flashEl.className = ''; }, 700);
-    setTimeout(function() { setAlert('clear', 'No Alerts'); }, 4000);
+    setTimeout(function() { setAlert('clear'); }, 4000);
   }
 }
 
 function setSens(v) {
   sens = parseInt(v);
-  G('sval').textContent = v;
-  G('sens').style.background = 'linear-gradient(to right,var(--gold-dim) 0%,var(--gold-dim) ' + (v*10) + '%,var(--s3) ' + (v*10) + '%,var(--s3) 100%)';
+  document.getElementById('sval').textContent = v;
+  var pct = v * 10;
+  document.getElementById('sens').style.background =
+    'linear-gradient(to right,var(--gold-dim) 0%,var(--gold-dim) ' + pct + '%,var(--s3) ' + pct + '%,var(--s3) 100%)';
 }
 setSens(5);
 
+// Encode SDP to base64 string safe for copy-paste
 function enc(obj) {
-  var data = { type: obj.type, sdp: obj.sdp };
-  var str = JSON.stringify(data);
+  var str = JSON.stringify({ type: obj.type, sdp: obj.sdp });
   var bytes = new TextEncoder().encode(str);
-  var binary = '';
-  for (var i = 0; i < bytes.length; i++) { binary += String.fromCharCode(bytes[i]); }
-  return btoa(binary);
+  var bin = '';
+  for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
 }
 
+// Decode base64 string back to SDP object
 function dec(raw) {
-  var clean = raw.split('').filter(function(c) { return c.trim() !== '' || c === ' '; }).join('').replace(/ /g,'');
-  // remove all whitespace chars
-  var noSpace = '';
-  for (var i = 0; i < clean.length; i++) {
-    var code = clean.charCodeAt(i);
-    if (code > 32) noSpace += clean[i];
+  var clean = '';
+  for (var i = 0; i < raw.length; i++) {
+    var c = raw.charCodeAt(i);
+    if (c > 32) clean += raw[i];
   }
-  var binary = atob(noSpace);
-  var bytes = new Uint8Array(binary.length);
-  for (var j = 0; j < binary.length; j++) { bytes[j] = binary.charCodeAt(j); }
-  var str = new TextDecoder().decode(bytes);
-  var obj = JSON.parse(str);
-  if (!obj.type || !obj.sdp) throw new Error('Bad code');
+  var bin = atob(clean);
+  var bytes = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  var obj = JSON.parse(new TextDecoder().decode(bytes));
+  if (!obj.type || !obj.sdp) throw new Error('invalid');
   return obj;
 }
 
 function doCopy() {
   var val = tout.value;
   if (!val) return;
-  if (navigator.clipboard && navigator.clipboard.writeText) {
+  try {
     navigator.clipboard.writeText(val).then(function() {
       toast('Code copied!', 'ok');
-      bcopy.textContent = 'Copied!';
-      setTimeout(function() { bcopy.textContent = 'Copy'; }, 2000);
     });
-  } else {
+  } catch(e) {
     tout.select();
     document.execCommand('copy');
     toast('Code copied!', 'ok');
   }
 }
 
-function sigShow(step, outCode, showIn) {
+function sigShow(step, code) {
   signal.classList.add('show');
   sigstep.textContent = step;
-  if (outCode) {
-    lout.style.display = 'block';
-    tout.style.display = 'block';
-    tout.value = outCode;
-    bcopy.style.display = 'block';
-  } else {
-    lout.style.display = 'none';
-    tout.style.display = 'none';
-    bcopy.style.display = 'none';
-  }
-  if (showIn) {
-    lin.style.display = 'block';
-    inrow.style.display = 'flex';
-    tin.value = '';
-  } else {
-    lin.style.display = 'none';
-    inrow.style.display = 'none';
-  }
+  if (code) tout.value = code;
 }
 
-function sigHide() { signal.classList.remove('show'); }
+function sigHide() {
+  signal.classList.remove('show');
+}
+
+// Wait for ICE gathering to finish (max 6 seconds)
+function waitForICE(peerConn) {
+  return new Promise(function(resolve) {
+    if (peerConn.iceGatheringState === 'complete') { resolve(); return; }
+    var done = false;
+    function finish() { if (!done) { done = true; resolve(); } }
+    peerConn.addEventListener('icegatheringstatechange', function() {
+      if (peerConn.iceGatheringState === 'complete') finish();
+    });
+    setTimeout(finish, 6000);
+  });
+}
+
+// ── ROLE SWITCH ──────────────────────────────────────────────
 
 function setRole(r) {
   ROLE = r;
-  G('tcam').classList.toggle('on',  r === 'camera');
-  G('tview').classList.toggle('on', r === 'viewer');
+  document.getElementById('tcam').classList.toggle('on', r === 'camera');
+  document.getElementById('tview').classList.toggle('on', r === 'viewer');
   bstart.style.display  = r === 'camera' ? '' : 'none';
   bstop.style.display   = r === 'camera' ? '' : 'none';
-  G('sensbox').style.display = r === 'camera' ? '' : 'none';
+  document.getElementById('sensbox').style.display = r === 'camera' ? '' : 'none';
   stopAll();
   if (r === 'viewer') {
-    sigShow('Step 1 — Paste the Offer code from Camera, then tap Go', null, true);
-    showEmpty('Paste the camera code above then tap Go');
+    sigShow('VIEWER — Paste the Offer code from Camera on the right, tap Go. Then copy your Answer code back to Camera.', null);
+    showEmpty('Paste the camera code above and tap Go');
   } else {
     sigHide();
     showEmpty('Tap Start Camera to begin');
   }
 }
 
-function waitForICE(peerConn) {
-  return new Promise(function(resolve) {
-    if (peerConn.iceGatheringState === 'complete') { resolve(); return; }
-    function check() {
-      if (peerConn.iceGatheringState === 'complete') {
-        peerConn.removeEventListener('icegatheringstatechange', check);
-        resolve();
-      }
-    }
-    peerConn.addEventListener('icegatheringstatechange', check);
-    setTimeout(resolve, 6000);
-  });
-}
+// ── CAMERA ───────────────────────────────────────────────────
 
 async function startCam() {
   bstart.disabled = true;
   setStat('busy', 'Starting...');
-  showEmpty('Requesting camera access...');
+  showEmpty('Requesting camera...');
 
+  // Get camera stream
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-  } catch(e1) {
-    try { stream = await navigator.mediaDevices.getUserMedia({ video: true }); }
-    catch(e2) {
+  } catch(e) {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    } catch(e2) {
       bstart.disabled = false;
-      setStat('off', 'Offline');
-      showEmpty('Camera access denied. Check browser permissions.');
-      toast('Camera denied', 'err');
+      setStat('', 'Offline');
+      showEmpty('Camera denied — check permissions');
+      toast('Camera access denied', 'err');
       return;
     }
   }
 
-  feed.muted = true;
+  // Show the local camera feed right away
+  feed.muted   = true;
   feed.srcObject = stream;
+  feed.play().catch(function(){});
   hideEmpty();
-  livebdg.style.display = 'flex';
-  bstop.disabled = false;
+  livebadge.style.display = 'flex';
+  bstop.disabled  = false;
   bstart.disabled = false;
   bstart.textContent = 'Restart';
   setStat('busy', 'Waiting for viewer...');
 
-  pc = new RTCPeerConnection(ICE_CFG);
+  // Create RTCPeerConnection and add tracks
+  pc = new RTCPeerConnection(ICE);
   stream.getTracks().forEach(function(t) { pc.addTrack(t, stream); });
 
   pc.onconnectionstatechange = function() {
@@ -405,22 +444,25 @@ async function startCam() {
       toast('Viewer connected — live!', 'ok');
     }
     if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-      setStat('live', 'Viewer left');
+      setStat('busy', 'Viewer left');
       toast('Viewer disconnected', '');
     }
   };
 
+  // Create offer
   var offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
   await waitForICE(pc);
 
+  // Show offer code for camera to send to viewer
   sigShow(
-    'Step 1: Copy this code and send it to the Viewer device. Step 2: Paste their Answer code below.',
-    enc(pc.localDescription),
-    true
+    'CAMERA — Copy your Offer code (left) and give it to the Viewer. Paste their Answer code on the right.',
+    enc(pc.localDescription)
   );
-  toast('Copy the Offer code and send it to Viewer', '');
+  toast('Copy the offer code and send to Viewer', '');
 }
+
+// ── CONNECT (handles both camera Answer + viewer Offer) ──────
 
 async function doConnect() {
   var raw = tin.value.trim();
@@ -428,93 +470,106 @@ async function doConnect() {
 
   var data;
   try { data = dec(raw); }
-  catch(e) { toast('Invalid code — try copying again', 'err'); return; }
+  catch(e) { toast('Invalid code — copy it again', 'err'); return; }
 
-  // CAMERA receiving Answer
+  // CAMERA: receiving viewer Answer
   if (ROLE === 'camera') {
     if (!pc) { toast('Start camera first', 'err'); return; }
-    if (data.type !== 'answer') { toast('Wrong code — camera needs the Answer code from Viewer', 'err'); return; }
+    if (data.type !== 'answer') { toast('Wrong code — camera needs the Answer from Viewer', 'err'); return; }
     try {
       await pc.setRemoteDescription(new RTCSessionDescription(data));
-      toast('Connecting...', 'ok');
       tin.value = '';
+      toast('Connecting...', 'ok');
     } catch(e) {
-      toast('Error: ' + e.message, 'err');
+      toast('Connection failed: ' + e.message, 'err');
     }
     return;
   }
 
-  // VIEWER receiving Offer
+  // VIEWER: receiving camera Offer
   if (ROLE === 'viewer') {
-    if (data.type !== 'offer') { toast('Wrong code — Viewer needs the Offer code from Camera', 'err'); return; }
+    if (data.type !== 'offer') { toast('Wrong code — viewer needs the Offer from Camera', 'err'); return; }
+
+    // Clean up any existing connection
     if (pc) { pc.close(); pc = null; }
     stopDetect();
 
-    pc = new RTCPeerConnection(ICE_CFG);
-    var videoShown = false;
+    pc = new RTCPeerConnection(ICE);
+    var connected = false;
 
-    pc.ontrack = function(e) {
-      var s = (e.streams && e.streams[0]) ? e.streams[0] : new MediaStream([e.track]);
+    // THIS is where the remote video comes in
+    pc.ontrack = function(evt) {
+      var remoteStream = evt.streams && evt.streams[0]
+        ? evt.streams[0]
+        : new MediaStream([evt.track]);
+
+      // Set feed source and play
       feed.muted = false;
-      feed.srcObject = s;
+      feed.srcObject = remoteStream;
       feed.play().catch(function(){});
+
+      // Hide placeholder, show live badge
       hideEmpty();
-      livebdg.style.display = 'flex';
+      livebadge.style.display = 'flex';
       setStat('watch', 'Watching');
-      if (!videoShown) {
-        videoShown = true;
+
+      if (!connected) {
+        connected = true;
         sigHide();
         toast('Live feed connected!', 'ok');
-        startDetect(s);
+        startDetect(remoteStream);
       }
     };
 
     pc.onconnectionstatechange = function() {
       if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-        showEmpty('Camera disconnected');
         feed.srcObject = null;
-        livebdg.style.display = 'none';
-        setStat('off', 'Disconnected');
+        showEmpty('Camera disconnected');
+        livebadge.style.display = 'none';
+        setStat('', 'Disconnected');
         stopDetect();
         toast('Camera feed ended', 'err');
       }
     };
 
+    // Process offer and create answer
     await pc.setRemoteDescription(new RTCSessionDescription(data));
     var answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
     await waitForICE(pc);
 
+    // Show answer code for viewer to send back to camera
     sigShow(
-      'Step 2: Copy this Answer code and send it back to the Camera device.',
-      enc(pc.localDescription),
-      false
+      'VIEWER — Copy your Answer code (left) and give it to the Camera. Done — video will appear!',
+      enc(pc.localDescription)
     );
-    setStat('busy', 'Waiting for camera...');
+    setStat('busy', 'Waiting...');
     toast('Copy the Answer code and send it to Camera', '');
   }
 }
 
+// ── STOP ─────────────────────────────────────────────────────
+
 function stopAll() {
   stopDetect();
-  if (pc) { pc.close(); pc = null; }
+  if (pc) { try { pc.close(); } catch(e){} pc = null; }
   if (stream) { stream.getTracks().forEach(function(t) { t.stop(); }); stream = null; }
   feed.srcObject = null;
   feed.muted = true;
-  livebdg.style.display = 'none';
+  livebadge.style.display = 'none';
   bstart.disabled = false;
   bstart.textContent = 'Start Camera';
   bstop.disabled = true;
-  setStat('off', 'Offline');
-  setAlert('clear', 'No Alerts');
-  smot.textContent = 'MOTION: —';
-  ssnd.textContent = 'SOUND: —';
-  smot.classList.remove('hot');
-  ssnd.classList.remove('hot');
+  setStat('', 'Offline');
+  setAlert('clear');
+  smot.textContent = 'MOTION: —'; smot.classList.remove('hot');
+  ssnd.textContent = 'SOUND: —';  ssnd.classList.remove('hot');
   sigHide();
   tout.value = '';
-  tin.value = '';
+  tin.value  = '';
 }
+
+// ── DETECTION (runs on viewer side) ──────────────────────────
 
 function startDetect(s) {
   stopDetect();
@@ -524,33 +579,35 @@ function startDetect(s) {
   prev = null;
   motionLoop();
   try {
-    var track = s.getAudioTracks()[0];
-    if (track) {
+    var tracks = s.getAudioTracks();
+    if (tracks.length > 0) {
       actx = new (window.AudioContext || window.webkitAudioContext)();
-      var src = actx.createMediaStreamSource(new MediaStream([track]));
+      var src = actx.createMediaStreamSource(new MediaStream([tracks[0]]));
       analyser = actx.createAnalyser();
       analyser.fftSize = 512;
       src.connect(analyser);
       soundLoop();
     }
-  } catch(e) { console.warn('Audio detect unavailable'); }
+  } catch(e) { console.warn('Audio detection unavailable:', e); }
 }
 
 function stopDetect() {
   if (floop) { cancelAnimationFrame(floop); floop = null; }
-  if (actx) { try { actx.close(); } catch(e) {} actx = null; analyser = null; }
+  if (actx) { try { actx.close(); } catch(e){} actx = null; analyser = null; }
   prev = null;
 }
 
 function motionLoop() {
-  if (!feed.srcObject) { floop = requestAnimationFrame(function() { setTimeout(motionLoop, 300); }); return; }
+  if (!feed.srcObject) {
+    floop = requestAnimationFrame(function() { setTimeout(motionLoop, 300); });
+    return;
+  }
   floop = requestAnimationFrame(function() { setTimeout(motionLoop, 120); });
   if (feed.readyState < 2) return;
   try { mctx.drawImage(feed, 0, 0, 160, 120); } catch(e) { return; }
   var cur = mctx.getImageData(0, 0, 160, 120);
   if (prev) {
-    var d1 = prev.data, d2 = cur.data;
-    var n = 0;
+    var d1 = prev.data, d2 = cur.data, n = 0;
     var thr = 28 * (1 - (sens - 1) / 12);
     for (var i = 0; i < d1.length; i += 4) {
       if ((Math.abs(d1[i]-d2[i]) + Math.abs(d1[i+1]-d2[i+1]) + Math.abs(d1[i+2]-d2[i+2])) / 3 > thr) n++;
@@ -561,7 +618,8 @@ function motionLoop() {
     smot.classList.toggle('hot', lvl > 25);
     var now = Date.now();
     if (ratio > 0.012 * (1 - (sens-1)/14) && now - tLM > 2500) {
-      tLM = now; fireAlert('motion', 'Motion Detected');
+      tLM = now;
+      fireAlert('motion', 'Motion Detected');
     }
   }
   prev = cur;
@@ -580,7 +638,8 @@ function soundLoop() {
   ssnd.classList.toggle('hot', lvl > 30);
   var now = Date.now();
   if (avg > 0.10 * (1 - (sens-1)/13) && now - tLS > 2000) {
-    tLS = now; fireAlert('sound', 'Sound Detected');
+    tLS = now;
+    fireAlert('sound', 'Sound Detected');
   }
 }
 
@@ -589,6 +648,7 @@ function fireAlert(type, msg) {
   toast(msg, type === 'sound' ? 'err' : '');
 }
 
+// Init
 setRole('camera');
 </script>
 </body>
