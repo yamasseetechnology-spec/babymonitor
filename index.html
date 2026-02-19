@@ -269,17 +269,18 @@ function hidePlaceholder(){ placeholder.style.display='none'; }
 
 // Encode/decode signal codes safely (handles all unicode/special chars in SDP)
 function encode(obj){
-  return JSON.stringify(obj);
+  // Base64 encode so copy-paste never corrupts SDP whitespace/newlines
+  const raw = JSON.stringify({ type: obj.type, sdp: obj.sdp });
+  return btoa(unescape(encodeURIComponent(raw)));
 }
 function decode(str){
-  const cleaned = str.trim();
-  if(!cleaned) throw new Error('empty');
-  return JSON.parse(cleaned);
-} catch(e) {
-    // Fallback for plain JSON
-    try { return JSON.parse(str.trim()); } catch(e2) { throw new Error('bad code'); }
-  }
+  const cleaned = str.trim().replace(/\s+/g, '');
+  const raw = decodeURIComponent(escape(atob(cleaned)));
+  const obj = JSON.parse(raw);
+  if(!obj.type || !obj.sdp) throw new Error('missing fields');
+  return { type: obj.type, sdp: obj.sdp };
 }
+
 
 function copySignal(){
   navigator.clipboard.writeText(sigOut.value).then(()=>{
