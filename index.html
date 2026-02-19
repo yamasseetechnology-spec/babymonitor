@@ -203,7 +203,10 @@ const ICE = { iceServers:[
   {urls:'stun:stun.l.google.com:19302'},
   {urls:'stun:stun1.l.google.com:19302'},
   {urls:'stun:stun2.l.google.com:19302'},
-  {urls:'stun:stun3.l.google.com:19302'}
+  // Free public TURN servers — relay video when direct connection fails
+  {urls:'turn:openrelay.metered.ca:80',     username:'openrelayproject', credential:'openrelayproject'},
+  {urls:'turn:openrelay.metered.ca:443',    username:'openrelayproject', credential:'openrelayproject'},
+  {urls:'turn:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject'}
 ]};
 
 // ── DOM ──────────────────────────────────────────────────────
@@ -347,7 +350,7 @@ async function startCamera(){
     if(pc.iceGatheringState==='complete') return resolve();
     pc.onicegatheringstatechange=()=>{ if(pc.iceGatheringState==='complete') resolve(); };
     // Timeout safety — send after 3s regardless
-    setTimeout(resolve, 3000);
+    setTimeout(resolve, 6000);
   });
 
   // Show the offer code for user to copy
@@ -435,7 +438,7 @@ async function applySignal(){
     await new Promise(resolve=>{
       if(pc.iceGatheringState==='complete') return resolve();
       pc.onicegatheringstatechange=()=>{ if(pc.iceGatheringState==='complete') resolve(); };
-      setTimeout(resolve,3000);
+      setTimeout(resolve,6000);
     });
 
     // Show answer code for viewer to copy back to camera
