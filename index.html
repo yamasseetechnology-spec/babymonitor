@@ -43,7 +43,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 #signal-box{display:none;flex-direction:column;gap:6px;padding:10px 14px;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
 #signal-box.show{display:flex;}
 #signal-box label{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,215,0,0.5);}
-#signal-box textarea{background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.04em;padding:8px 10px;resize:none;outline:none;height:60px;line-height:1.4;}
+#signal-box textarea{background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.02em;padding:8px 10px;resize:none;outline:none;height:72px;line-height:1.4;word-break:break-all;}
 #signal-box textarea:focus{border-color:var(--gold-dim);}
 #signal-box textarea::placeholder{color:rgba(255,215,0,0.2);}
 .sig-row{display:flex;gap:6px;align-items:center;}
@@ -130,7 +130,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
     <div id="sig-step">Tap Start Camera first</div>
     <label id="sig-label-out"></label>
     <div class="sig-row">
-      <textarea id="sig-out" readonly placeholder="Code appears here..."></textarea>
+      <textarea id="sig-out" readonly placeholder="Code appears here..." onclick="this.select()"></textarea>
       <button class="sig-btn" id="sig-copy-btn" onclick="copySignal()" style="display:none">📋 Copy</button>
     </div>
     <label id="sig-label-in" style="display:none"></label>
@@ -267,9 +267,19 @@ updateSens(5);
 function showPlaceholder(msg){ $('placeholder-msg').textContent=msg; placeholder.style.display=''; }
 function hidePlaceholder(){ placeholder.style.display='none'; }
 
-// Compress/decompress signal codes so they're shorter to copy
-function encode(obj){ return btoa(JSON.stringify(obj)); }
-function decode(str){ return JSON.parse(atob(str.trim())); }
+// Encode/decode signal codes safely (handles all unicode/special chars in SDP)
+function encode(obj){
+  return JSON.stringify(obj);
+}
+function decode(str){
+  const cleaned = str.trim();
+  if(!cleaned) throw new Error('empty');
+  return JSON.parse(cleaned);
+} catch(e) {
+    // Fallback for plain JSON
+    try { return JSON.parse(str.trim()); } catch(e2) { throw new Error('bad code'); }
+  }
+}
 
 function copySignal(){
   navigator.clipboard.writeText(sigOut.value).then(()=>{
