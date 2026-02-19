@@ -19,8 +19,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--gold);fon
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(0,0,0,0.05) 3px,rgba(0,0,0,0.05) 4px);}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
-
-/* TOP BAR */
 #top-bar{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;
   background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;}
 #top-bar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
@@ -37,21 +35,16 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 #status.busy{color:var(--gold);}
 #status.busy .dot{background:var(--gold);animation:pulse 0.8s infinite;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.6)}}
-
-/* TABS */
 #tabs{display:flex;gap:6px;padding:7px 14px;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
 .tab{flex:1;padding:7px 8px;font-family:var(--ui);font-size:0.82rem;font-weight:600;letter-spacing:0.07em;
   text-transform:uppercase;background:var(--s2);color:rgba(255,215,0,0.45);border:1px solid var(--border);
   border-radius:8px;cursor:pointer;transition:all 0.2s;min-height:44px;}
 .tab.on{background:rgba(255,215,0,0.08);color:var(--gold);border-color:var(--gold-dim);box-shadow:0 0 14px rgba(255,215,0,0.1);}
 .tab:hover:not(.on){background:var(--s3);color:var(--gold);}
-
-/* SIGNAL PANEL */
 #signal{display:none;flex-direction:column;gap:6px;padding:10px 14px;
   background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
 #signal.show{display:flex;}
-#sig-step{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;
-  color:rgba(255,215,0,0.6);line-height:1.6;padding:4px 0;}
+#sig-step{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;color:rgba(255,215,0,0.6);line-height:1.6;padding:4px 0;}
 #signal textarea{background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;
   font-family:var(--mono);font-size:0.65rem;padding:8px 10px;resize:none;outline:none;
   height:68px;line-height:1.5;word-break:break-all;width:100%;}
@@ -64,8 +57,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .sbtn:hover{background:rgba(255,215,0,0.22);}
 .sbtn.green{background:rgba(57,255,20,0.08);border-color:rgba(57,255,20,0.4);color:var(--green);}
 .sbtn.green:hover{background:rgba(57,255,20,0.18);}
-
-/* VIDEO AREA */
 #cam-section{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 14px 6px;}
 #cam-wrap{flex:1;min-height:0;position:relative;border-radius:20px;overflow:hidden;
   border:1px solid var(--border);background:var(--s1);box-shadow:inset 0 0 35px rgba(255,215,0,0.04),0 0 40px rgba(0,0,0,0.7);}
@@ -74,35 +65,24 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 #cam-wrap::before{top:10px;left:10px;border-width:2px 0 0 2px;border-radius:3px 0 0 0;}
 #cam-wrap::after{bottom:10px;right:10px;border-width:0 2px 2px 0;border-radius:0 0 3px 0;}
 #feed{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;border-radius:20px;background:#000;z-index:3;}
-#mcanvas{display:none;position:absolute;inset:0;}
-
-/* PLACEHOLDER */
+#mcanvas{display:none;position:absolute;inset:0;z-index:1;}
 #empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:14px;border-radius:20px;background:var(--s1);z-index:2;}
+  justify-content:center;gap:14px;border-radius:20px;background:var(--s1);z-index:4;}
 #empty svg{opacity:0.13;width:56px;height:56px;}
 #empty p{font-family:var(--mono);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;
   color:rgba(255,215,0,0.28);text-align:center;padding:0 24px;line-height:1.9;}
-
-/* LIVE BADGE */
 #livebadge{position:absolute;bottom:14px;left:14px;display:none;align-items:center;gap:6px;
   background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);border:1px solid rgba(255,59,59,0.5);
   border-radius:8px;padding:4px 10px;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.14em;color:#fff;z-index:6;}
 #livebadge .ldot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 7px var(--red-glow);animation:blink 1.2s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.1}}
-
-/* STATS */
-#stats{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;
-  align-items:flex-end;gap:4px;z-index:6;pointer-events:none;}
+#stats{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;z-index:6;pointer-events:none;}
 .chip{background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);border:1px solid var(--border);
   border-radius:6px;padding:3px 8px;font-family:var(--mono);font-size:0.62rem;letter-spacing:0.09em;color:rgba(255,215,0,0.5);}
 .chip.hot{border-color:rgba(255,59,59,0.5);color:var(--red);background:rgba(255,59,59,0.12);}
-
-/* ALERT FLASH */
 #flash{position:absolute;inset:0;border-radius:20px;pointer-events:none;z-index:5;opacity:0;transition:opacity 0.1s;}
 #flash.motion{background:radial-gradient(ellipse at center,rgba(255,215,0,0.1) 0%,transparent 70%);border:2px solid rgba(255,215,0,0.35);border-radius:20px;}
 #flash.sound{background:radial-gradient(ellipse at center,rgba(255,59,59,0.1) 0%,transparent 70%);border:2px solid rgba(255,59,59,0.35);border-radius:20px;}
-
-/* CONTROLS */
 #ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0 4px;flex-shrink:0;}
 .btn{padding:0 16px;height:44px;font-family:var(--ui);font-size:0.88rem;font-weight:700;
   letter-spacing:0.08em;text-transform:uppercase;background:var(--s2);color:var(--gold);
@@ -128,8 +108,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 #alertbar.motion-alert .adot{background:var(--gold);box-shadow:0 0 8px var(--gold-glow);animation:pulse 0.8s infinite;}
 #alertbar.sound-alert{border-color:rgba(255,59,59,0.5);color:var(--red);background:rgba(255,59,59,0.07);}
 #alertbar.sound-alert .adot{background:var(--red);box-shadow:0 0 8px var(--red-glow);animation:pulse 0.8s infinite;}
-
-/* TOASTS */
 #toasts{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:1000;
   display:flex;flex-direction:column-reverse;gap:6px;pointer-events:none;width:calc(100% - 28px);max-width:420px;}
 .toast{padding:10px 14px;border-radius:8px;font-family:var(--mono);font-size:0.75rem;
@@ -145,20 +123,16 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 </head>
 <body>
 <div id="app">
-
   <div id="top-bar">
     <img id="logo" src="https://i.ibb.co/gFMKLNWd/Chat-GPT-Image-Dec-31-2025-01-45-02-AM-Photoroom.png" alt="Yamassee">
     <div id="status" class="off"><div class="dot"></div><span id="stxt">Offline</span></div>
   </div>
-
   <div id="tabs">
     <button class="tab on" id="tcam" onclick="setRole('camera')">📷 Room Camera</button>
-    <button class="tab"    id="tview" onclick="setRole('viewer')">👁 Viewer</button>
+    <button class="tab" id="tview" onclick="setRole('viewer')">👁 Viewer</button>
   </div>
-
-  <!-- SIGNAL PANEL — shown during connection -->
   <div id="signal">
-    <div id="sig-step">—</div>
+    <div id="sig-step"></div>
     <label id="lout" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,215,0,0.5);display:none;">Your Code (copy this):</label>
     <div class="srow">
       <textarea id="tout" readonly onclick="this.select()" style="display:none" placeholder="Code will appear here..."></textarea>
@@ -170,7 +144,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
       <button class="sbtn green" onclick="doConnect()">Go ▶</button>
     </div>
   </div>
-
   <div id="cam-section">
     <div id="cam-wrap">
       <video id="feed" autoplay playsinline></video>
@@ -188,7 +161,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
     </div>
     <div id="ctrl">
       <button class="btn primary" id="bstart" onclick="startCam()">Start Camera</button>
-      <button class="btn danger"  id="bstop"  onclick="stopAll()" disabled>Stop</button>
+      <button class="btn danger" id="bstop" onclick="stopAll()" disabled>Stop</button>
       <div id="sensbox">
         <div id="senslbl">Sensitivity <span id="sval">5</span></div>
         <input type="range" id="sens" min="1" max="10" value="5" oninput="setSens(this.value)">
@@ -200,54 +173,49 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 <div id="toasts"></div>
 
 <script>
-/* ================================================================
-   YAMASSEE SMART MONITOR — Clean build
-   No servers. No accounts. No third parties.
+/*
+  YAMASSEE SMART MONITOR
+  Zero servers. Zero accounts. Pure WebRTC.
 
-   WebRTC manual signaling — you copy a code from camera, paste
-   into viewer, viewer sends a code back, paste into camera. Done.
-
-   CAMERA → copy Offer → send to Viewer
-   VIEWER  → paste Offer → copy Answer → send to Camera  
-   CAMERA  → paste Answer → CONNECTED ✓
-================================================================ */
+  CAMERA: Start Camera → Copy Offer code → send to Viewer
+  VIEWER: Paste Offer → tap Go → Copy Answer code → send to Camera
+  CAMERA: Paste Answer → tap Go → LIVE
+*/
 
 const ICE_CFG = { iceServers: [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
   { urls: 'stun:stun2.l.google.com:19302' },
   { urls: 'stun:stun3.l.google.com:19302' },
-  { urls: 'turn:openrelay.metered.ca:80',              username:'openrelayproject', credential:'openrelayproject' },
-  { urls: 'turn:openrelay.metered.ca:443',             username:'openrelayproject', credential:'openrelayproject' },
-  { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject' }
+  { urls: 'turn:openrelay.metered.ca:80',               username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443',              username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443?transport=tcp',username: 'openrelayproject', credential: 'openrelayproject' }
 ]};
 
-// ── DOM ───────────────────────────────────────────────────────
 const G = id => document.getElementById(id);
-const feed    = G('feed');
-const mcanvas = G('mcanvas');
-const empty   = G('empty');
-const emsg    = G('emsg');
-const livebdg = G('livebadge');
-const flash   = G('flash');
-const stxt    = G('stxt');
-const status  = G('status');
-const smot    = G('smot');
-const ssnd    = G('ssnd');
-const alrt    = G('alrt');
-const alertbar= G('alertbar');
-const bstart  = G('bstart');
-const bstop   = G('bstop');
-const signal  = G('signal');
-const sigstep = G('sig-step');
-const tout    = G('tout');
-const tin     = G('tin');
-const lout    = G('lout');
-const lin     = G('lin');
-const inrow   = G('inrow');
-const bcopy   = G('bcopy');
+const feed     = G('feed');
+const mcanvas  = G('mcanvas');
+const empty    = G('empty');
+const emsg     = G('emsg');
+const livebdg  = G('livebadge');
+const flashEl  = G('flash');
+const status   = G('status');
+const stxt     = G('stxt');
+const smot     = G('smot');
+const ssnd     = G('ssnd');
+const alrt     = G('alrt');
+const alertbar = G('alertbar');
+const bstart   = G('bstart');
+const bstop    = G('bstop');
+const signal   = G('signal');
+const sigstep  = G('sig-step');
+const tout     = G('tout');
+const tin      = G('tin');
+const lout     = G('lout');
+const lin      = G('lin');
+const inrow    = G('inrow');
+const bcopy    = G('bcopy');
 
-// ── STATE ─────────────────────────────────────────────────────
 let ROLE     = 'camera';
 let pc       = null;
 let stream   = null;
@@ -260,82 +228,88 @@ let analyser = null;
 let tLM      = 0;
 let tLS      = 0;
 
-// ── HELPERS ───────────────────────────────────────────────────
-function toast(msg, cls='') {
-  const d = document.createElement('div');
+function toast(msg, cls) {
+  cls = cls || '';
+  var d = document.createElement('div');
   d.className = 'toast ' + cls;
   d.textContent = msg;
   G('toasts').prepend(d);
-  setTimeout(() => d.remove(), 3200);
+  setTimeout(function() { d.remove(); }, 3200);
 }
+
 function setStat(cls, txt) { status.className = cls; stxt.textContent = txt; }
-function showEmpty(msg)    { emsg.textContent = msg; empty.style.display = 'flex'; empty.style.zIndex = '2'; }
-function hideEmpty()       { empty.style.display = 'none'; empty.style.zIndex = '-1'; }
+
+function showEmpty(msg) {
+  emsg.textContent = msg;
+  empty.style.display = 'flex';
+  empty.style.zIndex = '4';
+}
+
+function hideEmpty() {
+  empty.style.display = 'none';
+  empty.style.zIndex = '-1';
+}
+
 function setAlert(type, msg) {
   alertbar.className = type === 'clear' ? '' : type + '-alert';
   alrt.textContent = msg;
   if (type !== 'clear') {
-    flash.className = type; flash.style.opacity = '1';
-    setTimeout(() => { flash.style.opacity = '0'; flash.className = ''; }, 700);
-    setTimeout(() => setAlert('clear', 'No Alerts'), 4000);
+    flashEl.className = type;
+    flashEl.style.opacity = '1';
+    setTimeout(function() { flashEl.style.opacity = '0'; flashEl.className = ''; }, 700);
+    setTimeout(function() { setAlert('clear', 'No Alerts'); }, 4000);
   }
 }
+
 function setSens(v) {
-  sens = parseInt(v); G('sval').textContent = v;
-  G('sens').style.background = `linear-gradient(to right,var(--gold-dim) 0%,var(--gold-dim) ${v*10}%,var(--s3) ${v*10}%,var(--s3) 100%)`;
+  sens = parseInt(v);
+  G('sval').textContent = v;
+  G('sens').style.background = 'linear-gradient(to right,var(--gold-dim) 0%,var(--gold-dim) ' + (v*10) + '%,var(--s3) ' + (v*10) + '%,var(--s3) 100%)';
 }
 setSens(5);
 
-// ── ENCODE / DECODE — compressed with native CompressionStream (~70% shorter) ──
-async function enc(obj) {
-  const data = { type: obj.type, sdp: obj.sdp };
-  const bytes = new TextEncoder().encode(JSON.stringify(data));
-  // Compress using built-in browser API
-  const cs = new CompressionStream('deflate-raw');
-  const writer = cs.writable.getWriter();
-  writer.write(bytes); writer.close();
-  const chunks = []; const reader = cs.readable.getReader();
-  while (true) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); }
-  const compressed = new Uint8Array(chunks.reduce((a,c) => a+c.length, 0));
-  let off = 0; for (const c of chunks) { compressed.set(c, off); off += c.length; }
-  // Base64 encode — URL-safe chars only so copy-paste never breaks it
-  return btoa(String.fromCharCode(...compressed)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+function enc(obj) {
+  var data = { type: obj.type, sdp: obj.sdp };
+  var str = JSON.stringify(data);
+  var bytes = new TextEncoder().encode(str);
+  var binary = '';
+  for (var i = 0; i < bytes.length; i++) { binary += String.fromCharCode(bytes[i]); }
+  return btoa(binary);
 }
-async function dec(raw) {
-  const clean = raw.trim().replace(/\s/g,'').replace(/-/g,'+').replace(/_/g,'/');
-  const pad = clean + '=='.slice(0, (4 - clean.length % 4) % 4);
-  const compressed = Uint8Array.from(atob(pad), c => c.charCodeAt(0));
-  const ds = new DecompressionStream('deflate-raw');
-  const writer = ds.writable.getWriter();
-  writer.write(compressed); writer.close();
-  const chunks = []; const reader = ds.readable.getReader();
-  while (true) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); }
-  const bytes = new Uint8Array(chunks.reduce((a,c) => a+c.length, 0));
-  let off = 0; for (const c of chunks) { bytes.set(c, off); off += c.length; }
-  const obj = JSON.parse(new TextDecoder().decode(bytes));
+
+function dec(raw) {
+  var clean = raw.split('').filter(function(c) { return c.trim() !== '' || c === ' '; }).join('').replace(/ /g,'');
+  // remove all whitespace chars
+  var noSpace = '';
+  for (var i = 0; i < clean.length; i++) {
+    var code = clean.charCodeAt(i);
+    if (code > 32) noSpace += clean[i];
+  }
+  var binary = atob(noSpace);
+  var bytes = new Uint8Array(binary.length);
+  for (var j = 0; j < binary.length; j++) { bytes[j] = binary.charCodeAt(j); }
+  var str = new TextDecoder().decode(bytes);
+  var obj = JSON.parse(str);
   if (!obj.type || !obj.sdp) throw new Error('Bad code');
   return obj;
 }
 
-// ── COPY ──────────────────────────────────────────────────────
 function doCopy() {
-  const val = tout.value;
+  var val = tout.value;
   if (!val) return;
-  navigator.clipboard.writeText(val)
-    .then(() => {
-      toast('✓ Code copied!', 'ok');
-      bcopy.textContent = '✓ Done';
-      setTimeout(() => bcopy.textContent = '📋 Copy', 2000);
-    })
-    .catch(() => {
-      // Fallback for browsers that block clipboard
-      tout.select();
-      document.execCommand('copy');
-      toast('✓ Code copied!', 'ok');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(val).then(function() {
+      toast('Code copied!', 'ok');
+      bcopy.textContent = 'Copied!';
+      setTimeout(function() { bcopy.textContent = 'Copy'; }, 2000);
     });
+  } else {
+    tout.select();
+    document.execCommand('copy');
+    toast('Code copied!', 'ok');
+  }
 }
 
-// ── SIGNAL UI HELPERS ─────────────────────────────────────────
 function sigShow(step, outCode, showIn) {
   signal.classList.add('show');
   sigstep.textContent = step;
@@ -358,9 +332,9 @@ function sigShow(step, outCode, showIn) {
     inrow.style.display = 'none';
   }
 }
+
 function sigHide() { signal.classList.remove('show'); }
 
-// ── ROLE SWITCH ───────────────────────────────────────────────
 function setRole(r) {
   ROLE = r;
   G('tcam').classList.toggle('on',  r === 'camera');
@@ -370,7 +344,7 @@ function setRole(r) {
   G('sensbox').style.display = r === 'camera' ? '' : 'none';
   stopAll();
   if (r === 'viewer') {
-    sigShow('Step 1 — Paste the Offer code from the Camera, then tap Go ▶', null, true);
+    sigShow('Step 1 — Paste the Offer code from Camera, then tap Go', null, true);
     showEmpty('Paste the camera code above then tap Go');
   } else {
     sigHide();
@@ -378,18 +352,20 @@ function setRole(r) {
   }
 }
 
-// ── WAIT FOR ICE GATHERING ────────────────────────────────────
-function waitForICE(pc) {
-  return new Promise(resolve => {
-    if (pc.iceGatheringState === 'complete') return resolve();
-    const check = () => { if (pc.iceGatheringState === 'complete') { pc.removeEventListener('icegatheringstatechange', check); resolve(); } };
-    pc.addEventListener('icegatheringstatechange', check);
-    // Safety timeout — send whatever we have after 6s
+function waitForICE(peerConn) {
+  return new Promise(function(resolve) {
+    if (peerConn.iceGatheringState === 'complete') { resolve(); return; }
+    function check() {
+      if (peerConn.iceGatheringState === 'complete') {
+        peerConn.removeEventListener('icegatheringstatechange', check);
+        resolve();
+      }
+    }
+    peerConn.addEventListener('icegatheringstatechange', check);
     setTimeout(resolve, 6000);
   });
 }
 
-// ── START CAMERA ──────────────────────────────────────────────
 async function startCam() {
   bstart.disabled = true;
   setStat('busy', 'Starting...');
@@ -402,31 +378,29 @@ async function startCam() {
     catch(e2) {
       bstart.disabled = false;
       setStat('off', 'Offline');
-      showEmpty('Camera access denied\nCheck browser permissions');
+      showEmpty('Camera access denied. Check browser permissions.');
       toast('Camera denied', 'err');
       return;
     }
   }
 
-  // Show local feed immediately
-  feed.muted   = true;
+  feed.muted = true;
   feed.srcObject = stream;
   hideEmpty();
   livebdg.style.display = 'flex';
-  bstop.disabled  = false;
+  bstop.disabled = false;
   bstart.disabled = false;
   bstart.textContent = 'Restart';
   setStat('busy', 'Waiting for viewer...');
 
-  // Create peer connection
   pc = new RTCPeerConnection(ICE_CFG);
-  stream.getTracks().forEach(t => pc.addTrack(t, stream));
+  stream.getTracks().forEach(function(t) { pc.addTrack(t, stream); });
 
-  pc.onconnectionstatechange = () => {
+  pc.onconnectionstatechange = function() {
     if (pc.connectionState === 'connected') {
       setStat('live', 'Broadcasting');
       sigHide();
-      toast('✓ Viewer connected — live!', 'ok');
+      toast('Viewer connected — live!', 'ok');
     }
     if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
       setStat('live', 'Viewer left');
@@ -434,73 +408,66 @@ async function startCam() {
     }
   };
 
-  // Create offer
-  const offer = await pc.createOffer();
+  var offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
   await waitForICE(pc);
 
-  // Show offer code
   sigShow(
-    '📋 Step 1: Copy this code → send to Viewer device\n⏳ Step 2: Paste their Answer code below when you get it back',
-    await enc(pc.localDescription),
+    'Step 1: Copy this code and send it to the Viewer device. Step 2: Paste their Answer code below.',
+    enc(pc.localDescription),
     true
   );
-  toast('Copy the Offer code and send it to the Viewer', '');
+  toast('Copy the Offer code and send it to Viewer', '');
 }
 
-// ── VIEWER: paste offer → connect ─────────────────────────────
 async function doConnect() {
-  const raw = tin.value.trim();
+  var raw = tin.value.trim();
   if (!raw) { toast('Paste a code first', 'err'); return; }
 
-  let data;
-  try { data = await dec(raw); }
-  catch(e) { toast('Invalid code — copy it again carefully', 'err'); return; }
+  var data;
+  try { data = dec(raw); }
+  catch(e) { toast('Invalid code — try copying again', 'err'); return; }
 
-  // ── CAMERA side: receiving viewer's Answer ──
+  // CAMERA receiving Answer
   if (ROLE === 'camera') {
     if (!pc) { toast('Start camera first', 'err'); return; }
-    if (data.type !== 'answer') { toast('This looks like an Offer — camera needs an Answer code', 'err'); return; }
+    if (data.type !== 'answer') { toast('Wrong code — camera needs the Answer code from Viewer', 'err'); return; }
     try {
       await pc.setRemoteDescription(new RTCSessionDescription(data));
-      toast('Answer accepted — connecting...', 'ok');
+      toast('Connecting...', 'ok');
       tin.value = '';
     } catch(e) {
-      toast('Failed: ' + e.message, 'err');
+      toast('Error: ' + e.message, 'err');
     }
     return;
   }
 
-  // ── VIEWER side: receiving camera's Offer ──
+  // VIEWER receiving Offer
   if (ROLE === 'viewer') {
-    if (data.type !== 'offer') { toast('This looks like an Answer — viewer needs the Offer code from camera', 'err'); return; }
+    if (data.type !== 'offer') { toast('Wrong code — Viewer needs the Offer code from Camera', 'err'); return; }
     if (pc) { pc.close(); pc = null; }
     stopDetect();
 
     pc = new RTCPeerConnection(ICE_CFG);
-    let videoShown = false;
+    var videoShown = false;
 
-    pc.ontrack = e => {
-      // Assign stream immediately on ANY track — don't wait for video-only
-      const s = (e.streams && e.streams[0]) ? e.streams[0] : new MediaStream([e.track]);
+    pc.ontrack = function(e) {
+      var s = (e.streams && e.streams[0]) ? e.streams[0] : new MediaStream([e.track]);
       feed.muted = false;
       feed.srcObject = s;
-      feed.play().catch(() => {});
-
-      // Hide placeholder and show video — do this for every track event
+      feed.play().catch(function(){});
       hideEmpty();
       livebdg.style.display = 'flex';
       setStat('watch', 'Watching');
-
       if (!videoShown) {
         videoShown = true;
         sigHide();
-        toast('✓ Live feed connected!', 'ok');
+        toast('Live feed connected!', 'ok');
         startDetect(s);
       }
     };
 
-    pc.onconnectionstatechange = () => {
+    pc.onconnectionstatechange = function() {
       if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
         showEmpty('Camera disconnected');
         feed.srcObject = null;
@@ -512,27 +479,24 @@ async function doConnect() {
     };
 
     await pc.setRemoteDescription(new RTCSessionDescription(data));
-    const answer = await pc.createAnswer();
+    var answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
     await waitForICE(pc);
 
-    // Show answer code — do NOT call showEmpty here, leave video area alone
     sigShow(
-      '📋 Copy this Answer code → send back to Camera device
-Then paste it into the camera and tap Go ▶',
-      await enc(pc.localDescription),
+      'Step 2: Copy this Answer code and send it back to the Camera device.',
+      enc(pc.localDescription),
       false
     );
     setStat('busy', 'Waiting for camera...');
-    toast('Copy the Answer code and send it back to camera', '');
+    toast('Copy the Answer code and send it to Camera', '');
   }
 }
 
-// ── STOP ALL ──────────────────────────────────────────────────
 function stopAll() {
   stopDetect();
-  if (pc)     { pc.close(); pc = null; }
-  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  if (pc) { pc.close(); pc = null; }
+  if (stream) { stream.getTracks().forEach(function(t) { t.stop(); }); stream = null; }
   feed.srcObject = null;
   feed.muted = true;
   livebdg.style.display = 'none';
@@ -550,7 +514,6 @@ function stopAll() {
   tin.value = '';
 }
 
-// ── DETECTION (VIEWER SIDE ONLY) ──────────────────────────────
 function startDetect(s) {
   stopDetect();
   mcanvas.width  = 160;
@@ -558,13 +521,12 @@ function startDetect(s) {
   mctx = mcanvas.getContext('2d', { willReadFrequently: true });
   prev = null;
   motionLoop();
-
   try {
-    const track = s.getAudioTracks()[0];
+    var track = s.getAudioTracks()[0];
     if (track) {
-      actx     = new (window.AudioContext || window.webkitAudioContext)();
-      const src = actx.createMediaStreamSource(new MediaStream([track]));
-      analyser  = actx.createAnalyser();
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      var src = actx.createMediaStreamSource(new MediaStream([track]));
+      analyser = actx.createAnalyser();
       analyser.fftSize = 512;
       src.connect(analyser);
       soundLoop();
@@ -573,30 +535,31 @@ function startDetect(s) {
 }
 
 function stopDetect() {
-  if (floop)   { cancelAnimationFrame(floop); floop = null; }
-  if (actx)    { try { actx.close(); } catch(e){} actx = null; analyser = null; }
+  if (floop) { cancelAnimationFrame(floop); floop = null; }
+  if (actx) { try { actx.close(); } catch(e) {} actx = null; analyser = null; }
   prev = null;
 }
 
 function motionLoop() {
-  if (!feed.srcObject) { floop = requestAnimationFrame(() => setTimeout(motionLoop, 300)); return; }
-  floop = requestAnimationFrame(() => setTimeout(motionLoop, 120));
+  if (!feed.srcObject) { floop = requestAnimationFrame(function() { setTimeout(motionLoop, 300); }); return; }
+  floop = requestAnimationFrame(function() { setTimeout(motionLoop, 120); });
   if (feed.readyState < 2) return;
   try { mctx.drawImage(feed, 0, 0, 160, 120); } catch(e) { return; }
-  const cur = mctx.getImageData(0, 0, 160, 120);
+  var cur = mctx.getImageData(0, 0, 160, 120);
   if (prev) {
-    const d1 = prev.data, d2 = cur.data;
-    let n = 0;
-    const thr = 28 * (1 - (sens - 1) / 12);
-    for (let i = 0; i < d1.length; i += 4)
+    var d1 = prev.data, d2 = cur.data;
+    var n = 0;
+    var thr = 28 * (1 - (sens - 1) / 12);
+    for (var i = 0; i < d1.length; i += 4) {
       if ((Math.abs(d1[i]-d2[i]) + Math.abs(d1[i+1]-d2[i+1]) + Math.abs(d1[i+2]-d2[i+2])) / 3 > thr) n++;
-    const ratio = n / (d1.length / 4);
-    const lvl   = Math.min(100, Math.round(ratio * 4500));
+    }
+    var ratio = n / (d1.length / 4);
+    var lvl = Math.min(100, Math.round(ratio * 4500));
     smot.textContent = 'MOTION: ' + lvl + '%';
     smot.classList.toggle('hot', lvl > 25);
-    const now = Date.now();
+    var now = Date.now();
     if (ratio > 0.012 * (1 - (sens-1)/14) && now - tLM > 2500) {
-      tLM = now; fireAlert('motion', '⚡ Motion Detected');
+      tLM = now; fireAlert('motion', 'Motion Detected');
     }
   }
   prev = cur;
@@ -605,26 +568,25 @@ function motionLoop() {
 function soundLoop() {
   if (!actx) return;
   requestAnimationFrame(soundLoop);
-  const data = new Uint8Array(analyser.frequencyBinCount);
+  var data = new Uint8Array(analyser.frequencyBinCount);
   analyser.getByteFrequencyData(data);
-  let sum = 0;
-  for (let i = 0; i < data.length; i++) sum += data[i];
-  const avg = sum / data.length / 255;
-  const lvl = Math.min(100, Math.round(avg * 500));
+  var sum = 0;
+  for (var i = 0; i < data.length; i++) sum += data[i];
+  var avg = sum / data.length / 255;
+  var lvl = Math.min(100, Math.round(avg * 500));
   ssnd.textContent = 'SOUND: ' + lvl + '%';
   ssnd.classList.toggle('hot', lvl > 30);
-  const now = Date.now();
+  var now = Date.now();
   if (avg > 0.10 * (1 - (sens-1)/13) && now - tLS > 2000) {
-    tLS = now; fireAlert('sound', '🔊 Sound Detected');
+    tLS = now; fireAlert('sound', 'Sound Detected');
   }
 }
 
 function fireAlert(type, msg) {
   setAlert(type, msg);
-  toast('🔔 ' + msg, type === 'sound' ? 'err' : '');
+  toast(msg, type === 'sound' ? 'err' : '');
 }
 
-// ── INIT ──────────────────────────────────────────────────────
 setRole('camera');
 </script>
 </body>
