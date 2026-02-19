@@ -12,542 +12,598 @@
   --green:#39FF14;--green-glow:rgba(57,255,20,0.3);
   --bg:#070707;--s1:#0E0E0E;--s2:#151515;--s3:#1C1C1C;
   --border:rgba(255,215,0,0.13);
-  --font-ui:'Rajdhani',sans-serif;--font-mono:'Share Tech Mono',monospace;
+  --ui:'Rajdhani',sans-serif;--mono:'Share Tech Mono',monospace;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--gold);font-family:var(--font-ui);}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--gold);font-family:var(--ui);}
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
-  background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,0,0,0.05) 3px,rgba(0,0,0,0.05) 4px);}
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(0,0,0,0.05) 3px,rgba(0,0,0,0.05) 4px);}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
 
 /* TOP BAR */
-#top-bar{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;}
-#top-bar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);}
-#logo{height:34px;width:auto;filter:drop-shadow(0 0 8px var(--gold-glow));}
-#conn-status{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;background:var(--s2);border:1px solid var(--border);border-radius:20px;color:rgba(255,215,0,0.45);transition:all 0.3s;}
-#conn-status .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,215,0,0.25);flex-shrink:0;transition:all 0.3s;}
-#conn-status.live .dot{background:var(--green);box-shadow:0 0 8px var(--green-glow);animation:pdot 1.5s infinite;}
-#conn-status.live{color:var(--gold);border-color:rgba(255,215,0,0.3);}
-#conn-status.connecting .dot{background:var(--gold);animation:pdot 0.9s infinite;}
-#conn-status.watching .dot{background:#7DF9FF;box-shadow:0 0 8px rgba(125,249,255,0.4);animation:pdot 1.5s infinite;}
-#conn-status.watching{color:#7DF9FF;border-color:rgba(125,249,255,0.3);}
-@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.65)}}
+#top-bar{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;
+  background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;}
+#top-bar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);}
+#logo{height:34px;filter:drop-shadow(0 0 8px var(--gold-glow));}
+#status{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:0.68rem;
+  letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;background:var(--s2);
+  border:1px solid var(--border);border-radius:20px;color:rgba(255,215,0,0.45);transition:all 0.3s;}
+#status .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,215,0,0.2);flex-shrink:0;transition:all 0.3s;}
+#status.live{color:var(--gold);border-color:rgba(255,215,0,0.3);}
+#status.live .dot{background:var(--green);box-shadow:0 0 8px var(--green-glow);animation:pulse 1.5s infinite;}
+#status.watch{color:#7DF9FF;border-color:rgba(125,249,255,0.3);}
+#status.watch .dot{background:#7DF9FF;box-shadow:0 0 8px rgba(125,249,255,0.4);animation:pulse 1.5s infinite;}
+#status.busy{color:var(--gold);}
+#status.busy .dot{background:var(--gold);animation:pulse 0.8s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.6)}}
 
 /* TABS */
-#role-tabs{display:flex;gap:6px;padding:7px 14px;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
-.rtab{flex:1;padding:7px 8px;font-family:var(--font-ui);font-size:0.82rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;background:var(--s2);color:rgba(255,215,0,0.45);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;min-height:44px;}
-.rtab.active{background:rgba(255,215,0,0.08);color:var(--gold);border-color:var(--gold-dim);box-shadow:0 0 14px rgba(255,215,0,0.1);}
-.rtab:hover:not(.active){background:var(--s3);color:var(--gold);}
+#tabs{display:flex;gap:6px;padding:7px 14px;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
+.tab{flex:1;padding:7px 8px;font-family:var(--ui);font-size:0.82rem;font-weight:600;letter-spacing:0.07em;
+  text-transform:uppercase;background:var(--s2);color:rgba(255,215,0,0.45);border:1px solid var(--border);
+  border-radius:8px;cursor:pointer;transition:all 0.2s;min-height:44px;}
+.tab.on{background:rgba(255,215,0,0.08);color:var(--gold);border-color:var(--gold-dim);box-shadow:0 0 14px rgba(255,215,0,0.1);}
+.tab:hover:not(.on){background:var(--s3);color:var(--gold);}
 
-/* SIGNAL BOX — the copy/paste area */
-#signal-box{display:none;flex-direction:column;gap:6px;padding:10px 14px;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
-#signal-box.show{display:flex;}
-#signal-box label{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,215,0,0.5);}
-#signal-box textarea{background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.02em;padding:8px 10px;resize:none;outline:none;height:72px;line-height:1.4;word-break:break-all;}
-#signal-box textarea:focus{border-color:var(--gold-dim);}
-#signal-box textarea::placeholder{color:rgba(255,215,0,0.2);}
-.sig-row{display:flex;gap:6px;align-items:center;}
-.sig-btn{padding:6px 14px;font-family:var(--font-ui);font-size:0.8rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid rgba(255,215,0,0.4);border-radius:6px;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
-.sig-btn:hover{background:rgba(255,215,0,0.22);}
-.sig-btn.go{background:rgba(57,255,20,0.1);border-color:rgba(57,255,20,0.4);color:var(--green);}
-.sig-btn.go:hover{background:rgba(57,255,20,0.2);}
-#sig-step{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.08em;color:rgba(255,215,0,0.5);line-height:1.5;}
+/* SIGNAL PANEL */
+#signal{display:none;flex-direction:column;gap:6px;padding:10px 14px;
+  background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
+#signal.show{display:flex;}
+#sig-step{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;
+  color:rgba(255,215,0,0.6);line-height:1.6;padding:4px 0;}
+#signal textarea{background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;
+  font-family:var(--mono);font-size:0.65rem;padding:8px 10px;resize:none;outline:none;
+  height:68px;line-height:1.5;word-break:break-all;width:100%;}
+#signal textarea:focus{border-color:var(--gold-dim);}
+#signal textarea::placeholder{color:rgba(255,215,0,0.2);}
+.srow{display:flex;gap:6px;}
+.sbtn{padding:8px 14px;font-family:var(--ui);font-size:0.8rem;font-weight:700;letter-spacing:0.06em;
+  text-transform:uppercase;background:rgba(255,215,0,0.1);color:var(--gold);
+  border:1px solid rgba(255,215,0,0.4);border-radius:6px;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
+.sbtn:hover{background:rgba(255,215,0,0.22);}
+.sbtn.green{background:rgba(57,255,20,0.08);border-color:rgba(57,255,20,0.4);color:var(--green);}
+.sbtn.green:hover{background:rgba(57,255,20,0.18);}
 
-/* CAMERA SECTION */
+/* VIDEO AREA */
 #cam-section{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 14px 6px;}
-#cam-wrapper{flex:1;min-height:0;position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--border);background:var(--s1);box-shadow:inset 0 0 35px rgba(255,215,0,0.05),0 0 40px rgba(0,0,0,0.7);}
-#cam-wrapper::before,#cam-wrapper::after{content:'';position:absolute;width:18px;height:18px;border-color:rgba(255,215,0,0.5);border-style:solid;z-index:6;pointer-events:none;}
-#cam-wrapper::before{top:10px;left:10px;border-width:2px 0 0 2px;border-radius:3px 0 0 0;}
-#cam-wrapper::after{bottom:10px;right:10px;border-width:0 2px 2px 0;border-radius:0 0 3px 0;}
-#camera-feed{width:100%;height:100%;object-fit:cover;display:block;border-radius:20px;background:#000;}
-#motion-canvas{display:none;position:absolute;inset:0;}
+#cam-wrap{flex:1;min-height:0;position:relative;border-radius:20px;overflow:hidden;
+  border:1px solid var(--border);background:var(--s1);box-shadow:inset 0 0 35px rgba(255,215,0,0.04),0 0 40px rgba(0,0,0,0.7);}
+#cam-wrap::before,#cam-wrap::after{content:'';position:absolute;width:18px;height:18px;
+  border-color:rgba(255,215,0,0.5);border-style:solid;z-index:6;pointer-events:none;}
+#cam-wrap::before{top:10px;left:10px;border-width:2px 0 0 2px;border-radius:3px 0 0 0;}
+#cam-wrap::after{bottom:10px;right:10px;border-width:0 2px 2px 0;border-radius:0 0 3px 0;}
+#feed{width:100%;height:100%;object-fit:cover;display:block;border-radius:20px;background:#000;}
+#mcanvas{display:none;position:absolute;inset:0;}
 
 /* PLACEHOLDER */
-#cam-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:20px;background:var(--s1);z-index:2;}
-#cam-placeholder svg{opacity:0.15;width:56px;height:56px;}
-#cam-placeholder p{font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,215,0,0.3);text-align:center;padding:0 24px;line-height:1.9;}
+#empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:14px;border-radius:20px;background:var(--s1);z-index:2;}
+#empty svg{opacity:0.13;width:56px;height:56px;}
+#empty p{font-family:var(--mono);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;
+  color:rgba(255,215,0,0.28);text-align:center;padding:0 24px;line-height:1.9;}
 
-/* LIVE badge */
-#live-badge{position:absolute;bottom:14px;left:14px;display:none;align-items:center;gap:6px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);border:1px solid rgba(255,59,59,0.5);border-radius:8px;padding:4px 10px;font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.14em;color:#fff;z-index:6;}
-#live-badge .ldot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 7px var(--red-glow);animation:blink 1.2s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+/* LIVE BADGE */
+#livebadge{position:absolute;bottom:14px;left:14px;display:none;align-items:center;gap:6px;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);border:1px solid rgba(255,59,59,0.5);
+  border-radius:8px;padding:4px 10px;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.14em;color:#fff;z-index:6;}
+#livebadge .ldot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 7px var(--red-glow);animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.1}}
 
-/* Stats */
-#cam-stats{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;z-index:6;pointer-events:none;}
-.stat-chip{display:flex;align-items:center;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.09em;color:rgba(255,215,0,0.5);}
-.stat-chip.hot{border-color:rgba(255,59,59,0.5);color:var(--red);background:rgba(255,59,59,0.12);}
+/* STATS */
+#stats{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;
+  align-items:flex-end;gap:4px;z-index:6;pointer-events:none;}
+.chip{background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);border:1px solid var(--border);
+  border-radius:6px;padding:3px 8px;font-family:var(--mono);font-size:0.62rem;letter-spacing:0.09em;color:rgba(255,215,0,0.5);}
+.chip.hot{border-color:rgba(255,59,59,0.5);color:var(--red);background:rgba(255,59,59,0.12);}
 
-/* Alert flash */
-#alert-flash{position:absolute;inset:0;border-radius:20px;pointer-events:none;z-index:5;opacity:0;transition:opacity 0.1s;}
-#alert-flash.motion{background:radial-gradient(ellipse at center,rgba(255,215,0,0.1) 0%,transparent 70%);border:2px solid rgba(255,215,0,0.35);border-radius:20px;}
-#alert-flash.sound{background:radial-gradient(ellipse at center,rgba(255,59,59,0.1) 0%,transparent 70%);border:2px solid rgba(255,59,59,0.35);border-radius:20px;}
+/* ALERT FLASH */
+#flash{position:absolute;inset:0;border-radius:20px;pointer-events:none;z-index:5;opacity:0;transition:opacity 0.1s;}
+#flash.motion{background:radial-gradient(ellipse at center,rgba(255,215,0,0.1) 0%,transparent 70%);border:2px solid rgba(255,215,0,0.35);border-radius:20px;}
+#flash.sound{background:radial-gradient(ellipse at center,rgba(255,59,59,0.1) 0%,transparent 70%);border:2px solid rgba(255,59,59,0.35);border-radius:20px;}
 
 /* CONTROLS */
-#ctrl-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0 4px;flex-shrink:0;}
-.ctrl-btn{padding:0 16px;height:44px;font-family:var(--font-ui);font-size:0.88rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
-.ctrl-btn:hover{background:var(--s3);box-shadow:0 0 16px var(--gold-glow);border-color:rgba(255,215,0,0.35);}
-.ctrl-btn:active{transform:scale(0.97);}
-.ctrl-btn.primary{background:rgba(255,215,0,0.1);border-color:var(--gold-dim);box-shadow:0 0 14px var(--gold-glow);}
-.ctrl-btn.danger{border-color:rgba(255,59,59,0.4);color:var(--red);}
-.ctrl-btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;}
-#sens-group{display:flex;flex-direction:column;gap:3px;flex:1;min-width:110px;}
-#sens-label{font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,215,0,0.45);display:flex;justify-content:space-between;}
-#sens-label span{color:var(--gold);}
-#sensitivity{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:linear-gradient(to right,var(--gold-dim) 50%,var(--s3) 50%);outline:none;cursor:pointer;}
-#sensitivity::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);box-shadow:0 0 8px var(--gold-glow);cursor:pointer;}
-#sensitivity::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);cursor:pointer;}
-#alert-bar{width:100%;padding:7px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.09em;color:rgba(255,215,0,0.45);display:flex;align-items:center;gap:8px;transition:all 0.3s;}
-#alert-bar .ab-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,215,0,0.25);flex-shrink:0;transition:all 0.3s;}
-#alert-bar.motion-alert{border-color:rgba(255,215,0,0.45);color:var(--gold);background:rgba(255,215,0,0.07);}
-#alert-bar.motion-alert .ab-dot{background:var(--gold);box-shadow:0 0 8px var(--gold-glow);animation:pdot 0.8s infinite;}
-#alert-bar.sound-alert{border-color:rgba(255,59,59,0.5);color:var(--red);background:rgba(255,59,59,0.07);}
-#alert-bar.sound-alert .ab-dot{background:var(--red);box-shadow:0 0 8px var(--red-glow);animation:pdot 0.8s infinite;}
+#ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0 4px;flex-shrink:0;}
+.btn{padding:0 16px;height:44px;font-family:var(--ui);font-size:0.88rem;font-weight:700;
+  letter-spacing:0.08em;text-transform:uppercase;background:var(--s2);color:var(--gold);
+  border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
+.btn:hover{background:var(--s3);box-shadow:0 0 16px var(--gold-glow);border-color:rgba(255,215,0,0.35);}
+.btn:active{transform:scale(0.97);}
+.btn.primary{background:rgba(255,215,0,0.1);border-color:var(--gold-dim);box-shadow:0 0 14px var(--gold-glow);}
+.btn.danger{border-color:rgba(255,59,59,0.4);color:var(--red);}
+.btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;}
+#sensbox{display:flex;flex-direction:column;gap:3px;flex:1;min-width:110px;}
+#senslbl{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;
+  color:rgba(255,215,0,0.45);display:flex;justify-content:space-between;}
+#senslbl span{color:var(--gold);}
+#sens{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;
+  background:linear-gradient(to right,var(--gold-dim) 50%,var(--s3) 50%);outline:none;cursor:pointer;}
+#sens::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+  background:var(--gold);border:2px solid var(--bg);box-shadow:0 0 8px var(--gold-glow);cursor:pointer;}
+#alertbar{width:100%;padding:7px 12px;background:var(--s2);border:1px solid var(--border);
+  border-radius:8px;font-family:var(--mono);font-size:0.72rem;letter-spacing:0.09em;
+  color:rgba(255,215,0,0.45);display:flex;align-items:center;gap:8px;transition:all 0.3s;}
+#alertbar .adot{width:7px;height:7px;border-radius:50%;background:rgba(255,215,0,0.25);flex-shrink:0;transition:all 0.3s;}
+#alertbar.motion-alert{border-color:rgba(255,215,0,0.45);color:var(--gold);background:rgba(255,215,0,0.07);}
+#alertbar.motion-alert .adot{background:var(--gold);box-shadow:0 0 8px var(--gold-glow);animation:pulse 0.8s infinite;}
+#alertbar.sound-alert{border-color:rgba(255,59,59,0.5);color:var(--red);background:rgba(255,59,59,0.07);}
+#alertbar.sound-alert .adot{background:var(--red);box-shadow:0 0 8px var(--red-glow);animation:pulse 0.8s infinite;}
 
 /* TOASTS */
-#toast-stack{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;flex-direction:column-reverse;gap:6px;pointer-events:none;width:calc(100% - 28px);max-width:420px;}
-.toast{padding:10px 14px;border-radius:8px;font-family:var(--font-mono);font-size:0.75rem;letter-spacing:0.08em;background:rgba(14,14,14,0.97);border:1px solid var(--border);backdrop-filter:blur(10px);color:var(--gold);animation:tin 0.25s ease,tout 0.3s ease 2.7s forwards;box-shadow:0 4px 20px rgba(0,0,0,0.5);}
-.toast.error{border-color:rgba(255,59,59,0.5);color:var(--red);}
-.toast.success{border-color:rgba(57,255,20,0.4);color:var(--green);}
+#toasts{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:1000;
+  display:flex;flex-direction:column-reverse;gap:6px;pointer-events:none;width:calc(100% - 28px);max-width:420px;}
+.toast{padding:10px 14px;border-radius:8px;font-family:var(--mono);font-size:0.75rem;
+  letter-spacing:0.08em;background:rgba(14,14,14,0.97);border:1px solid var(--border);
+  backdrop-filter:blur(10px);color:var(--gold);
+  animation:tin 0.25s ease,tout 0.3s ease 2.7s forwards;box-shadow:0 4px 20px rgba(0,0,0,0.5);}
+.toast.err{border-color:rgba(255,59,59,0.5);color:var(--red);}
+.toast.ok{border-color:rgba(57,255,20,0.4);color:var(--green);}
 @keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes tout{from{opacity:1}to{opacity:0}}
-@media(min-width:600px){#ctrl-bar{flex-wrap:nowrap;}#alert-bar{width:auto;flex:1;}}
+@keyframes tout{from{opacity:1}to{opacity:0;transform:translateY(-4px)}}
+@media(min-width:600px){#ctrl{flex-wrap:nowrap;}#alertbar{width:auto;flex:1;}}
 </style>
 </head>
 <body>
 <div id="app">
+
   <div id="top-bar">
     <img id="logo" src="https://i.ibb.co/gFMKLNWd/Chat-GPT-Image-Dec-31-2025-01-45-02-AM-Photoroom.png" alt="Yamassee">
-    <div id="conn-status" class="offline"><div class="dot"></div><span id="conn-text">Offline</span></div>
+    <div id="status" class="off"><div class="dot"></div><span id="stxt">Offline</span></div>
   </div>
 
-  <div id="role-tabs">
-    <button class="rtab active" id="tab-camera" onclick="switchRole('camera')">📷 Room Camera</button>
-    <button class="rtab"        id="tab-viewer" onclick="switchRole('viewer')">👁 Viewer</button>
+  <div id="tabs">
+    <button class="tab on" id="tcam" onclick="setRole('camera')">📷 Room Camera</button>
+    <button class="tab"    id="tview" onclick="setRole('viewer')">👁 Viewer</button>
   </div>
 
-  <!-- SIGNAL BOX: shown during connection setup -->
-  <div id="signal-box">
-    <div id="sig-step">Tap Start Camera first</div>
-    <label id="sig-label-out"></label>
-    <div class="sig-row">
-      <textarea id="sig-out" readonly placeholder="Code appears here..." onclick="this.select()"></textarea>
-      <button class="sig-btn" id="sig-copy-btn" onclick="copySignal()" style="display:none">📋 Copy</button>
+  <!-- SIGNAL PANEL — shown during connection -->
+  <div id="signal">
+    <div id="sig-step">—</div>
+    <label id="lout" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,215,0,0.5);display:none;">Your Code (copy this):</label>
+    <div class="srow">
+      <textarea id="tout" readonly onclick="this.select()" style="display:none" placeholder="Code will appear here..."></textarea>
+      <button class="sbtn" id="bcopy" onclick="doCopy()" style="display:none">📋 Copy</button>
     </div>
-    <label id="sig-label-in" style="display:none"></label>
-    <div class="sig-row" id="sig-in-row" style="display:none">
-      <textarea id="sig-in" placeholder="Paste code here..."></textarea>
-      <button class="sig-btn go" onclick="applySignal()">Connect ▶</button>
+    <label id="lin" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,215,0,0.5);display:none;">Paste Code Here:</label>
+    <div class="srow" id="inrow" style="display:none">
+      <textarea id="tin" onclick="this.select()" placeholder="Paste code here..."></textarea>
+      <button class="sbtn green" onclick="doConnect()">Go ▶</button>
     </div>
   </div>
 
   <div id="cam-section">
-    <div id="cam-wrapper">
-      <video id="camera-feed" autoplay playsinline></video>
-      <canvas id="motion-canvas"></canvas>
-      <div id="cam-placeholder">
-        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="4" y="14" width="56" height="36" rx="6" stroke="#FFD700" stroke-width="2.5"/>
-          <circle cx="32" cy="32" r="9" stroke="#FFD700" stroke-width="2.5"/>
-          <rect x="22" y="10" width="20" height="6" rx="3" stroke="#FFD700" stroke-width="2"/>
-          <circle cx="52" cy="22" r="3" fill="#FFD700" opacity="0.6"/>
-        </svg>
-        <p id="placeholder-msg">Tap Start Camera to begin</p>
+    <div id="cam-wrap">
+      <video id="feed" autoplay playsinline></video>
+      <canvas id="mcanvas"></canvas>
+      <div id="empty">
+        <svg viewBox="0 0 64 64" fill="none"><rect x="4" y="14" width="56" height="36" rx="6" stroke="#FFD700" stroke-width="2.5"/><circle cx="32" cy="32" r="9" stroke="#FFD700" stroke-width="2.5"/><rect x="22" y="10" width="20" height="6" rx="3" stroke="#FFD700" stroke-width="2"/><circle cx="52" cy="22" r="3" fill="#FFD700" opacity="0.6"/></svg>
+        <p id="emsg">Tap Start Camera to begin</p>
       </div>
-      <div id="live-badge"><div class="ldot"></div>LIVE</div>
-      <div id="cam-stats">
-        <div class="stat-chip" id="stat-motion">MOTION: —</div>
-        <div class="stat-chip" id="stat-sound">SOUND: —</div>
+      <div id="livebadge"><div class="ldot"></div>LIVE</div>
+      <div id="stats">
+        <div class="chip" id="smot">MOTION: —</div>
+        <div class="chip" id="ssnd">SOUND: —</div>
       </div>
-      <div id="alert-flash"></div>
+      <div id="flash"></div>
     </div>
-
-    <div id="ctrl-bar">
-      <button class="ctrl-btn primary" id="start-btn" onclick="startCamera()">Start Camera</button>
-      <button class="ctrl-btn danger"  id="stop-btn"  onclick="stopAll()" disabled>Stop</button>
-      <div id="sens-group">
-        <div id="sens-label">Sensitivity <span id="sens-val">5</span></div>
-        <input type="range" id="sensitivity" min="1" max="10" value="5" oninput="updateSens(this.value)">
+    <div id="ctrl">
+      <button class="btn primary" id="bstart" onclick="startCam()">Start Camera</button>
+      <button class="btn danger"  id="bstop"  onclick="stopAll()" disabled>Stop</button>
+      <div id="sensbox">
+        <div id="senslbl">Sensitivity <span id="sval">5</span></div>
+        <input type="range" id="sens" min="1" max="10" value="5" oninput="setSens(this.value)">
       </div>
-      <div id="alert-bar"><div class="ab-dot"></div><span id="alert-text">No Alerts</span></div>
+      <div id="alertbar"><div class="adot"></div><span id="alrt">No Alerts</span></div>
     </div>
   </div>
 </div>
-<div id="toast-stack"></div>
+<div id="toasts"></div>
 
 <script>
-/* ============================================================
-   YAMASSEE SMART MONITOR
-   Zero servers. Zero third parties. Zero accounts.
-   
-   Uses manual WebRTC signaling — you copy a code from the
-   camera and paste it into the viewer. One time per session.
-   Works on GitHub Pages, works anywhere, completely free.
+/* ================================================================
+   YAMASSEE SMART MONITOR — Clean build
+   No servers. No accounts. No third parties.
 
-   HOW TO CONNECT:
-   CAMERA DEVICE:
-     1. Tap "Start Camera"
-     2. Copy the OFFER code that appears
-     3. Send it to the viewer (text/email/airdrop/whatever)
-     4. Wait for viewer to send back an ANSWER code
-     5. Paste the answer code → Connected!
+   WebRTC manual signaling — you copy a code from camera, paste
+   into viewer, viewer sends a code back, paste into camera. Done.
 
-   VIEWER DEVICE:
-     1. Switch to Viewer tab
-     2. Paste the OFFER code from camera
-     3. Tap Connect — an ANSWER code appears
-     4. Send that answer back to camera
-     5. Camera pastes it → Connected!
-============================================================ */
+   CAMERA → copy Offer → send to Viewer
+   VIEWER  → paste Offer → copy Answer → send to Camera  
+   CAMERA  → paste Answer → CONNECTED ✓
+================================================================ */
 
-const ICE = { iceServers:[
-  {urls:'stun:stun.l.google.com:19302'},
-  {urls:'stun:stun1.l.google.com:19302'},
-  {urls:'stun:stun2.l.google.com:19302'},
-  // Free public TURN servers — relay video when direct connection fails
-  {urls:'turn:openrelay.metered.ca:80',     username:'openrelayproject', credential:'openrelayproject'},
-  {urls:'turn:openrelay.metered.ca:443',    username:'openrelayproject', credential:'openrelayproject'},
-  {urls:'turn:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject'}
+const ICE_CFG = { iceServers: [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
+  { urls: 'stun:stun3.l.google.com:19302' },
+  { urls: 'turn:openrelay.metered.ca:80',              username:'openrelayproject', credential:'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443',             username:'openrelayproject', credential:'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject' }
 ]};
 
-// ── DOM ──────────────────────────────────────────────────────
-const $ = id => document.getElementById(id);
-const video       = $('camera-feed');
-const canvas      = $('motion-canvas');
-const placeholder = $('cam-placeholder');
-const liveBadge   = $('live-badge');
-const alertBar    = $('alert-bar');
-const alertText   = $('alert-text');
-const alertFlash  = $('alert-flash');
-const connStatus  = $('conn-status');
-const connText    = $('conn-text');
-const statMotion  = $('stat-motion');
-const statSound   = $('stat-sound');
-const startBtn    = $('start-btn');
-const stopBtn     = $('stop-btn');
-const signalBox   = $('signal-box');
-const sigOut      = $('sig-out');
-const sigIn       = $('sig-in');
+// ── DOM ───────────────────────────────────────────────────────
+const G = id => document.getElementById(id);
+const feed    = G('feed');
+const mcanvas = G('mcanvas');
+const empty   = G('empty');
+const emsg    = G('emsg');
+const livebdg = G('livebadge');
+const flash   = G('flash');
+const stxt    = G('stxt');
+const status  = G('status');
+const smot    = G('smot');
+const ssnd    = G('ssnd');
+const alrt    = G('alrt');
+const alertbar= G('alertbar');
+const bstart  = G('bstart');
+const bstop   = G('bstop');
+const signal  = G('signal');
+const sigstep = G('sig-step');
+const tout    = G('tout');
+const tin     = G('tin');
+const lout    = G('lout');
+const lin     = G('lin');
+const inrow   = G('inrow');
+const bcopy   = G('bcopy');
 
-// ── STATE ────────────────────────────────────────────────────
-let role        = 'camera';
-let sensitivity = 5;
-let pc          = null;
-let localStream = null;
-let motionCtx   = null;
-let prevFrame   = null;
-let frameLoop   = null;
-let audioCtx    = null;
-let analyser    = null;
-let lastMotion  = 0;
-let lastSound   = 0;
+// ── STATE ─────────────────────────────────────────────────────
+let ROLE     = 'camera';
+let pc       = null;
+let stream   = null;
+let sens     = 5;
+let mctx     = null;
+let prev     = null;
+let floop    = null;
+let actx     = null;
+let analyser = null;
+let tLM      = 0;
+let tLS      = 0;
 
-// ── UTILITIES ────────────────────────────────────────────────
-function toast(msg, type=''){
-  const t=document.createElement('div');
-  t.className='toast '+type; t.textContent=msg;
-  $('toast-stack').prepend(t);
-  setTimeout(()=>t.remove(),3200);
+// ── HELPERS ───────────────────────────────────────────────────
+function toast(msg, cls='') {
+  const d = document.createElement('div');
+  d.className = 'toast ' + cls;
+  d.textContent = msg;
+  G('toasts').prepend(d);
+  setTimeout(() => d.remove(), 3200);
 }
-function setConn(cls,txt){ connStatus.className=cls; connText.textContent=txt; }
-function setAlert(type,msg){
-  alertBar.className=type==='clear'?'':type+'-alert';
-  alertText.textContent=msg;
-  if(type!=='clear'){
-    alertFlash.className=type; alertFlash.style.opacity='1';
-    setTimeout(()=>{alertFlash.style.opacity='0';alertFlash.className='';},700);
-    setTimeout(()=>setAlert('clear','No Alerts'),4000);
+function setStat(cls, txt) { status.className = cls; stxt.textContent = txt; }
+function showEmpty(msg)    { emsg.textContent = msg; empty.style.display = ''; }
+function hideEmpty()       { empty.style.display = 'none'; }
+function setAlert(type, msg) {
+  alertbar.className = type === 'clear' ? '' : type + '-alert';
+  alrt.textContent = msg;
+  if (type !== 'clear') {
+    flash.className = type; flash.style.opacity = '1';
+    setTimeout(() => { flash.style.opacity = '0'; flash.className = ''; }, 700);
+    setTimeout(() => setAlert('clear', 'No Alerts'), 4000);
   }
 }
-function updateSens(v){
-  sensitivity=parseInt(v); $('sens-val').textContent=v;
-  $('sensitivity').style.background=
-    `linear-gradient(to right,var(--gold-dim) 0%,var(--gold-dim) ${v*10}%,var(--s3) ${v*10}%,var(--s3) 100%)`;
+function setSens(v) {
+  sens = parseInt(v); G('sval').textContent = v;
+  G('sens').style.background = `linear-gradient(to right,var(--gold-dim) 0%,var(--gold-dim) ${v*10}%,var(--s3) ${v*10}%,var(--s3) 100%)`;
 }
-updateSens(5);
-function showPlaceholder(msg){ $('placeholder-msg').textContent=msg; placeholder.style.display=''; }
-function hidePlaceholder(){ placeholder.style.display='none'; }
+setSens(5);
 
-// Encode/decode signal codes safely (handles all unicode/special chars in SDP)
-function encode(obj){
-  // Base64 encode so copy-paste never corrupts SDP whitespace/newlines
-  const raw = JSON.stringify({ type: obj.type, sdp: obj.sdp });
-  return btoa(unescape(encodeURIComponent(raw)));
+// ── ENCODE / DECODE — safe base64 that survives copy-paste ────
+function enc(obj) {
+  // Pull out only what we need — avoids non-enumerable property issues
+  const data = { type: obj.type, sdp: obj.sdp };
+  const str  = JSON.stringify(data);
+  // Convert to base64 safely (handles unicode)
+  return btoa(String.fromCharCode(...new TextEncoder().encode(str)));
 }
-function decode(str){
-  const cleaned = str.trim().replace(/\s+/g, '');
-  const raw = decodeURIComponent(escape(atob(cleaned)));
-  const obj = JSON.parse(raw);
-  if(!obj.type || !obj.sdp) throw new Error('missing fields');
-  return { type: obj.type, sdp: obj.sdp };
+function dec(raw) {
+  // Strip ALL whitespace — handles accidental newlines from copy-paste
+  const clean = raw.replace(/\s/g, '');
+  // Decode base64 back to string
+  const str   = new TextDecoder().decode(Uint8Array.from(atob(clean), c => c.charCodeAt(0)));
+  const obj   = JSON.parse(str);
+  if (!obj.type || !obj.sdp) throw new Error('Bad code');
+  return obj;
 }
 
+// ── COPY ──────────────────────────────────────────────────────
+function doCopy() {
+  const val = tout.value;
+  if (!val) return;
+  navigator.clipboard.writeText(val)
+    .then(() => {
+      toast('✓ Code copied!', 'ok');
+      bcopy.textContent = '✓ Done';
+      setTimeout(() => bcopy.textContent = '📋 Copy', 2000);
+    })
+    .catch(() => {
+      // Fallback for browsers that block clipboard
+      tout.select();
+      document.execCommand('copy');
+      toast('✓ Code copied!', 'ok');
+    });
+}
 
-function copySignal(){
-  navigator.clipboard.writeText(sigOut.value).then(()=>{
-    toast('✓ Code copied — send to other device','success');
-    $('sig-copy-btn').textContent='✓ Copied!';
-    setTimeout(()=>$('sig-copy-btn').textContent='📋 Copy',2000);
-  }).catch(()=>{
-    sigOut.select(); document.execCommand('copy');
-    toast('✓ Code copied','success');
+// ── SIGNAL UI HELPERS ─────────────────────────────────────────
+function sigShow(step, outCode, showIn) {
+  signal.classList.add('show');
+  sigstep.textContent = step;
+  if (outCode) {
+    lout.style.display = 'block';
+    tout.style.display = 'block';
+    tout.value = outCode;
+    bcopy.style.display = 'block';
+  } else {
+    lout.style.display = 'none';
+    tout.style.display = 'none';
+    bcopy.style.display = 'none';
+  }
+  if (showIn) {
+    lin.style.display = 'block';
+    inrow.style.display = 'flex';
+    tin.value = '';
+  } else {
+    lin.style.display = 'none';
+    inrow.style.display = 'none';
+  }
+}
+function sigHide() { signal.classList.remove('show'); }
+
+// ── ROLE SWITCH ───────────────────────────────────────────────
+function setRole(r) {
+  ROLE = r;
+  G('tcam').classList.toggle('on',  r === 'camera');
+  G('tview').classList.toggle('on', r === 'viewer');
+  bstart.style.display  = r === 'camera' ? '' : 'none';
+  bstop.style.display   = r === 'camera' ? '' : 'none';
+  G('sensbox').style.display = r === 'camera' ? '' : 'none';
+  stopAll();
+  if (r === 'viewer') {
+    sigShow('Step 1 — Paste the Offer code from the Camera, then tap Go ▶', null, true);
+    showEmpty('Paste the camera code above then tap Go');
+  } else {
+    sigHide();
+    showEmpty('Tap Start Camera to begin');
+  }
+}
+
+// ── WAIT FOR ICE GATHERING ────────────────────────────────────
+function waitForICE(pc) {
+  return new Promise(resolve => {
+    if (pc.iceGatheringState === 'complete') return resolve();
+    const check = () => { if (pc.iceGatheringState === 'complete') { pc.removeEventListener('icegatheringstatechange', check); resolve(); } };
+    pc.addEventListener('icegatheringstatechange', check);
+    // Safety timeout — send whatever we have after 6s
+    setTimeout(resolve, 6000);
   });
 }
 
-// ── ROLE SWITCH ──────────────────────────────────────────────
-function switchRole(r){
-  role=r;
-  $('tab-camera').classList.toggle('active',r==='camera');
-  $('tab-viewer').classList.toggle('active',r==='viewer');
-  startBtn.style.display = r==='camera'?'':'none';
-  stopBtn.style.display  = r==='camera'?'':'none';
-  $('sens-group').style.display = r==='camera'?'':'none';
-  stopAll();
-
-  if(r==='viewer'){
-    showPlaceholder('Paste the camera code below and tap Connect');
-    signalBox.classList.add('show');
-    $('sig-step').textContent='Step 1: Paste the OFFER code from the Camera device';
-    $('sig-label-out').textContent='';
-    sigOut.style.display='none';
-    $('sig-copy-btn').style.display='none';
-    $('sig-label-in').style.display='block';
-    $('sig-label-in').textContent='Camera Offer Code:';
-    $('sig-in-row').style.display='flex';
-    sigIn.value='';
-    sigIn.placeholder='Paste offer code from camera here...';
-  } else {
-    showPlaceholder('Tap Start Camera to begin');
-    signalBox.classList.remove('show');
-  }
-}
-
-// ── START CAMERA ─────────────────────────────────────────────
-async function startCamera(){
-  startBtn.disabled=true;
-  setConn('connecting','Starting...');
+// ── START CAMERA ──────────────────────────────────────────────
+async function startCam() {
+  bstart.disabled = true;
+  setStat('busy', 'Starting...');
+  showEmpty('Requesting camera access...');
 
   try {
-    localStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-  } catch(e1){
-    try{ localStream=await navigator.mediaDevices.getUserMedia({video:true}); }
-    catch(e2){
-      startBtn.disabled=false; setConn('offline','Offline');
-      showPlaceholder('Camera access denied\nCheck browser permissions');
-      toast('Camera denied','error'); return;
+    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  } catch(e1) {
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: true }); }
+    catch(e2) {
+      bstart.disabled = false;
+      setStat('off', 'Offline');
+      showEmpty('Camera access denied\nCheck browser permissions');
+      toast('Camera denied', 'err');
+      return;
     }
   }
 
-  // Show local camera immediately
-  video.muted=true;
-  video.srcObject=localStream;
-  hidePlaceholder();
-  liveBadge.style.display='flex';
-  stopBtn.disabled=false;
-  startBtn.textContent='Restart';
-  startBtn.disabled=false;
-  setConn('connecting','Creating offer...');
+  // Show local feed immediately
+  feed.muted   = true;
+  feed.srcObject = stream;
+  hideEmpty();
+  livebdg.style.display = 'flex';
+  bstop.disabled  = false;
+  bstart.disabled = false;
+  bstart.textContent = 'Restart';
+  setStat('busy', 'Waiting for viewer...');
 
   // Create peer connection
-  pc = new RTCPeerConnection(ICE);
-  localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));
+  pc = new RTCPeerConnection(ICE_CFG);
+  stream.getTracks().forEach(t => pc.addTrack(t, stream));
 
-  // Collect ALL ICE candidates before sending offer
-  // (trickle-free = simpler copy/paste flow)
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === 'connected') {
+      setStat('live', 'Broadcasting');
+      sigHide();
+      toast('✓ Viewer connected — live!', 'ok');
+    }
+    if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+      setStat('live', 'Viewer left');
+      toast('Viewer disconnected', '');
+    }
+  };
+
+  // Create offer
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
+  await waitForICE(pc);
 
-  // Wait for ICE gathering to complete
-  await new Promise(resolve=>{
-    if(pc.iceGatheringState==='complete') return resolve();
-    pc.onicegatheringstatechange=()=>{ if(pc.iceGatheringState==='complete') resolve(); };
-    // Timeout safety — send after 3s regardless
-    setTimeout(resolve, 6000);
-  });
-
-  // Show the offer code for user to copy
-  const offerCode = encode(pc.localDescription);
-  signalBox.classList.add('show');
-  $('sig-step').textContent='Step 1: Copy this code → send it to the Viewer device';
-  $('sig-label-out').textContent='Your Offer Code (copy this):';
-  sigOut.style.display='block';
-  sigOut.value=offerCode;
-  $('sig-copy-btn').style.display='block';
-  $('sig-label-in').style.display='block';
-  $('sig-label-in').textContent='Step 2: Paste the Answer code from Viewer here:';
-  $('sig-in-row').style.display='flex';
-  sigIn.value='';
-  sigIn.placeholder='Paste answer code from viewer here...';
-  setConn('connecting','Waiting for viewer...');
-  toast('Copy the offer code and send it to the viewer device','');
+  // Show offer code
+  sigShow(
+    '📋 Step 1: Copy this code → send to Viewer device\n⏳ Step 2: Paste their Answer code below when you get it back',
+    enc(pc.localDescription),
+    true
+  );
+  toast('Copy the Offer code and send it to the Viewer', '');
 }
 
-// ── APPLY SIGNAL (called when paste + connect) ─────────────────
-async function applySignal(){
-  const raw = sigIn.value.trim();
-  if(!raw){ toast('Paste a code first','error'); return; }
+// ── VIEWER: paste offer → connect ─────────────────────────────
+async function doConnect() {
+  const raw = tin.value.trim();
+  if (!raw) { toast('Paste a code first', 'err'); return; }
 
   let data;
-  try{ data=decode(raw); }
-  catch(e){ toast('Invalid code — make sure you copied it correctly','error'); return; }
+  try { data = dec(raw); }
+  catch(e) { toast('Invalid code — copy it again carefully', 'err'); return; }
 
-  // ── CAMERA: receiving viewer's ANSWER ──
-  if(role==='camera'){
-    if(!pc){ toast('Start camera first','error'); return; }
-    try{
+  // ── CAMERA side: receiving viewer's Answer ──
+  if (ROLE === 'camera') {
+    if (!pc) { toast('Start camera first', 'err'); return; }
+    if (data.type !== 'answer') { toast('This looks like an Offer — camera needs an Answer code', 'err'); return; }
+    try {
       await pc.setRemoteDescription(new RTCSessionDescription(data));
-      pc.onconnectionstatechange=()=>{
-        if(pc.connectionState==='connected'){
-          setConn('live','Broadcasting');
-          toast('✓ Viewer connected — live!','success');
-          signalBox.classList.remove('show');
-        }
-        if(pc.connectionState==='disconnected'||pc.connectionState==='failed'){
-          toast('Viewer disconnected','error');
-          setConn('live','Broadcasting (viewer left)');
-        }
-      };
-      toast('Answer applied — connecting...','success');
-    }catch(e){ toast('Failed to apply answer: '+e.message,'error'); }
+      toast('Answer accepted — connecting...', 'ok');
+      tin.value = '';
+    } catch(e) {
+      toast('Failed: ' + e.message, 'err');
+    }
     return;
   }
 
-  // ── VIEWER: receiving camera's OFFER ──
-  if(role==='viewer'){
-    stopDetection();
-    if(pc){ pc.close(); pc=null; }
+  // ── VIEWER side: receiving camera's Offer ──
+  if (ROLE === 'viewer') {
+    if (data.type !== 'offer') { toast('This looks like an Answer — viewer needs the Offer code from camera', 'err'); return; }
+    if (pc) { pc.close(); pc = null; }
+    stopDetect();
 
-    pc=new RTCPeerConnection(ICE);
+    pc = new RTCPeerConnection(ICE_CFG);
 
-    pc.ontrack=e=>{
-      if(e.streams&&e.streams[0]){
-        video.muted=false;
-        video.srcObject=e.streams[0];
-        hidePlaceholder();
-        liveBadge.style.display='flex';
-        setConn('watching','Watching');
-        toast('✓ Live feed connected!','success');
-        startDetection(e.streams[0]);
+    pc.ontrack = e => {
+      if (e.streams && e.streams[0]) {
+        feed.muted = false;
+        feed.srcObject = e.streams[0];
+        hideEmpty();
+        livebdg.style.display = 'flex';
+        setStat('watch', 'Watching');
+        toast('✓ Live feed connected!', 'ok');
+        startDetect(e.streams[0]);
       }
     };
 
-    pc.onconnectionstatechange=()=>{
-      if(pc.connectionState==='disconnected'||pc.connectionState==='failed'){
-        showPlaceholder('Camera disconnected'); video.srcObject=null;
-        liveBadge.style.display='none'; setConn('offline','Disconnected');
-        stopDetection(); toast('Feed ended','error');
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+        showEmpty('Camera disconnected');
+        feed.srcObject = null;
+        livebdg.style.display = 'none';
+        setStat('off', 'Disconnected');
+        stopDetect();
+        toast('Camera feed ended', 'err');
       }
     };
 
-    // Set the camera's offer
     await pc.setRemoteDescription(new RTCSessionDescription(data));
-
-    // Create answer
-    const answer=await pc.createAnswer();
+    const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
+    await waitForICE(pc);
 
-    // Wait for ICE
-    await new Promise(resolve=>{
-      if(pc.iceGatheringState==='complete') return resolve();
-      pc.onicegatheringstatechange=()=>{ if(pc.iceGatheringState==='complete') resolve(); };
-      setTimeout(resolve,6000);
-    });
-
-    // Show answer code for viewer to copy back to camera
-    const answerCode=encode(pc.localDescription);
-    $('sig-step').textContent='Step 2: Copy this answer → paste it into the Camera device';
-    $('sig-label-out').textContent='Your Answer Code (copy this back to camera):';
-    sigOut.style.display='block';
-    sigOut.value=answerCode;
-    $('sig-copy-btn').style.display='block';
-    $('sig-label-in').style.display='none';
-    $('sig-in-row').style.display='none';
-    setConn('connecting','Waiting for camera to connect...');
-    showPlaceholder('Send the answer code to the Camera device\nThen the video will appear here');
-    toast('Copy the answer code and send it to the camera device','');
+    // Show answer code for viewer to send back to camera
+    sigShow(
+      '📋 Copy this Answer code → send back to Camera device\nThen paste it into the camera and tap Go ▶',
+      enc(pc.localDescription),
+      false
+    );
+    showEmpty('Send the Answer code to the Camera device\nVideo will appear here once connected');
+    setStat('busy', 'Waiting for camera...');
+    toast('Copy the Answer code and send it back to camera', '');
   }
 }
 
-// ── STOP ─────────────────────────────────────────────────────
-function stopAll(){
-  stopDetection();
-  if(pc){pc.close();pc=null;}
-  if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null;}
-  video.srcObject=null; video.muted=true;
-  liveBadge.style.display='none';
-  sigOut.value=''; sigIn.value='';
-  startBtn.textContent='Start Camera';
-  startBtn.disabled=false; stopBtn.disabled=true;
-  setConn('offline','Offline');
-  setAlert('clear','No Alerts');
-  statMotion.textContent='MOTION: —';
-  statSound.textContent='SOUND: —';
+// ── STOP ALL ──────────────────────────────────────────────────
+function stopAll() {
+  stopDetect();
+  if (pc)     { pc.close(); pc = null; }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  feed.srcObject = null;
+  feed.muted = true;
+  livebdg.style.display = 'none';
+  bstart.disabled = false;
+  bstart.textContent = 'Start Camera';
+  bstop.disabled = true;
+  setStat('off', 'Offline');
+  setAlert('clear', 'No Alerts');
+  smot.textContent = 'MOTION: —';
+  ssnd.textContent = 'SOUND: —';
+  smot.classList.remove('hot');
+  ssnd.classList.remove('hot');
+  sigHide();
+  tout.value = '';
+  tin.value = '';
 }
 
-// ── DETECTION (VIEWER SIDE) ───────────────────────────────────
-function startDetection(stream){
-  stopDetection();
-  canvas.width=160; canvas.height=120;
-  motionCtx=canvas.getContext('2d',{willReadFrequently:true});
-  prevFrame=null; motionLoop();
-  try{
-    const track=stream.getAudioTracks()[0];
-    if(track){
-      audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-      const src=audioCtx.createMediaStreamSource(new MediaStream([track]));
-      analyser=audioCtx.createAnalyser(); analyser.fftSize=512;
-      src.connect(analyser); soundLoop();
+// ── DETECTION (VIEWER SIDE ONLY) ──────────────────────────────
+function startDetect(s) {
+  stopDetect();
+  mcanvas.width  = 160;
+  mcanvas.height = 120;
+  mctx = mcanvas.getContext('2d', { willReadFrequently: true });
+  prev = null;
+  motionLoop();
+
+  try {
+    const track = s.getAudioTracks()[0];
+    if (track) {
+      actx     = new (window.AudioContext || window.webkitAudioContext)();
+      const src = actx.createMediaStreamSource(new MediaStream([track]));
+      analyser  = actx.createAnalyser();
+      analyser.fftSize = 512;
+      src.connect(analyser);
+      soundLoop();
     }
-  }catch(e){console.warn('Audio detection unavailable');}
+  } catch(e) { console.warn('Audio detect unavailable'); }
 }
-function stopDetection(){
-  if(frameLoop){cancelAnimationFrame(frameLoop);frameLoop=null;}
-  if(audioCtx){try{audioCtx.close();}catch(e){} audioCtx=null;analyser=null;}
-  prevFrame=null;
+
+function stopDetect() {
+  if (floop)   { cancelAnimationFrame(floop); floop = null; }
+  if (actx)    { try { actx.close(); } catch(e){} actx = null; analyser = null; }
+  prev = null;
 }
-function motionLoop(){
-  if(!video.srcObject){frameLoop=requestAnimationFrame(()=>setTimeout(motionLoop,300));return;}
-  frameLoop=requestAnimationFrame(()=>setTimeout(motionLoop,120));
-  if(video.readyState<2) return;
-  try{motionCtx.drawImage(video,0,0,160,120);}catch(e){return;}
-  const cur=motionCtx.getImageData(0,0,160,120);
-  if(prevFrame){
-    const d1=prevFrame.data,d2=cur.data;
-    let n=0; const total=d1.length/4;
-    const thr=28*(1-(sensitivity-1)/12);
-    for(let i=0;i<d1.length;i+=4){
-      if((Math.abs(d1[i]-d2[i])+Math.abs(d1[i+1]-d2[i+1])+Math.abs(d1[i+2]-d2[i+2]))/3>thr) n++;
-    }
-    const ratio=n/total;
-    const lvl=Math.min(100,Math.round(ratio*4500));
-    statMotion.textContent='MOTION: '+lvl+'%';
-    statMotion.classList.toggle('hot',lvl>25);
-    const now=Date.now();
-    if(ratio>0.012*(1-(sensitivity-1)/14)&&now-lastMotion>2500){
-      lastMotion=now; fireAlert('motion','⚡ Motion Detected');
+
+function motionLoop() {
+  if (!feed.srcObject) { floop = requestAnimationFrame(() => setTimeout(motionLoop, 300)); return; }
+  floop = requestAnimationFrame(() => setTimeout(motionLoop, 120));
+  if (feed.readyState < 2) return;
+  try { mctx.drawImage(feed, 0, 0, 160, 120); } catch(e) { return; }
+  const cur = mctx.getImageData(0, 0, 160, 120);
+  if (prev) {
+    const d1 = prev.data, d2 = cur.data;
+    let n = 0;
+    const thr = 28 * (1 - (sens - 1) / 12);
+    for (let i = 0; i < d1.length; i += 4)
+      if ((Math.abs(d1[i]-d2[i]) + Math.abs(d1[i+1]-d2[i+1]) + Math.abs(d1[i+2]-d2[i+2])) / 3 > thr) n++;
+    const ratio = n / (d1.length / 4);
+    const lvl   = Math.min(100, Math.round(ratio * 4500));
+    smot.textContent = 'MOTION: ' + lvl + '%';
+    smot.classList.toggle('hot', lvl > 25);
+    const now = Date.now();
+    if (ratio > 0.012 * (1 - (sens-1)/14) && now - tLM > 2500) {
+      tLM = now; fireAlert('motion', '⚡ Motion Detected');
     }
   }
-  prevFrame=cur;
+  prev = cur;
 }
-function soundLoop(){
-  if(!audioCtx) return;
+
+function soundLoop() {
+  if (!actx) return;
   requestAnimationFrame(soundLoop);
-  const data=new Uint8Array(analyser.frequencyBinCount);
+  const data = new Uint8Array(analyser.frequencyBinCount);
   analyser.getByteFrequencyData(data);
-  let sum=0; for(let i=0;i<data.length;i++) sum+=data[i];
-  const avg=sum/data.length/255;
-  const lvl=Math.min(100,Math.round(avg*500));
-  statSound.textContent='SOUND: '+lvl+'%';
-  statSound.classList.toggle('hot',lvl>30);
-  const now=Date.now();
-  if(avg>0.10*(1-(sensitivity-1)/13)&&now-lastSound>2000){
-    lastSound=now; fireAlert('sound','🔊 Sound Detected');
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) sum += data[i];
+  const avg = sum / data.length / 255;
+  const lvl = Math.min(100, Math.round(avg * 500));
+  ssnd.textContent = 'SOUND: ' + lvl + '%';
+  ssnd.classList.toggle('hot', lvl > 30);
+  const now = Date.now();
+  if (avg > 0.10 * (1 - (sens-1)/13) && now - tLS > 2000) {
+    tLS = now; fireAlert('sound', '🔊 Sound Detected');
   }
 }
-function fireAlert(type,msg){
-  setAlert(type,msg); toast('🔔 '+msg,type==='sound'?'error':'');
+
+function fireAlert(type, msg) {
+  setAlert(type, msg);
+  toast('🔔 ' + msg, type === 'sound' ? 'err' : '');
 }
 
-switchRole('camera');
+// ── INIT ──────────────────────────────────────────────────────
+setRole('camera');
 </script>
 </body>
 </html>
