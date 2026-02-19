@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Yamassee Smart Monitor</title>
-<!-- PeerJS — free hosted WebRTC signaling, no server needed -->
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -41,15 +39,19 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 .rtab.active{background:rgba(255,215,0,0.08);color:var(--gold);border-color:var(--gold-dim);box-shadow:0 0 14px rgba(255,215,0,0.1);}
 .rtab:hover:not(.active){background:var(--s3);color:var(--gold);}
 
-/* VIEWER CONNECT PANEL */
-#viewer-panel{display:none;align-items:center;gap:8px;padding:10px 14px;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
-#viewer-panel.show{display:flex;}
-#cam-id-input{flex:1;padding:10px 12px;background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;font-family:var(--font-mono);font-size:1rem;letter-spacing:0.12em;outline:none;text-transform:uppercase;min-width:0;}
-#cam-id-input:focus{border-color:var(--gold-dim);box-shadow:0 0 10px rgba(255,215,0,0.1);}
-#cam-id-input::placeholder{color:rgba(255,215,0,0.2);letter-spacing:0.08em;}
-#watch-btn{padding:0 18px;height:44px;font-family:var(--font-ui);font-size:0.88rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid var(--gold-dim);border-radius:8px;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;box-shadow:0 0 14px var(--gold-glow);}
-#watch-btn:hover{background:rgba(255,215,0,0.2);}
-#watch-btn:disabled{opacity:0.4;cursor:not-allowed;}
+/* SIGNAL BOX — the copy/paste area */
+#signal-box{display:none;flex-direction:column;gap:6px;padding:10px 14px;background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
+#signal-box.show{display:flex;}
+#signal-box label{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,215,0,0.5);}
+#signal-box textarea{background:var(--s2);color:var(--gold);border:1px solid var(--border);border-radius:8px;font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.04em;padding:8px 10px;resize:none;outline:none;height:60px;line-height:1.4;}
+#signal-box textarea:focus{border-color:var(--gold-dim);}
+#signal-box textarea::placeholder{color:rgba(255,215,0,0.2);}
+.sig-row{display:flex;gap:6px;align-items:center;}
+.sig-btn{padding:6px 14px;font-family:var(--font-ui);font-size:0.8rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid rgba(255,215,0,0.4);border-radius:6px;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
+.sig-btn:hover{background:rgba(255,215,0,0.22);}
+.sig-btn.go{background:rgba(57,255,20,0.1);border-color:rgba(57,255,20,0.4);color:var(--green);}
+.sig-btn.go:hover{background:rgba(57,255,20,0.2);}
+#sig-step{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.08em;color:rgba(255,215,0,0.5);line-height:1.5;}
 
 /* CAMERA SECTION */
 #cam-section{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 14px 6px;}
@@ -57,27 +59,13 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 #cam-wrapper::before,#cam-wrapper::after{content:'';position:absolute;width:18px;height:18px;border-color:rgba(255,215,0,0.5);border-style:solid;z-index:6;pointer-events:none;}
 #cam-wrapper::before{top:10px;left:10px;border-width:2px 0 0 2px;border-radius:3px 0 0 0;}
 #cam-wrapper::after{bottom:10px;right:10px;border-width:0 2px 2px 0;border-radius:0 0 3px 0;}
-#camera-feed{width:100%;height:100%;object-fit:cover;display:block;border-radius:20px;}
+#camera-feed{width:100%;height:100%;object-fit:cover;display:block;border-radius:20px;background:#000;}
 #motion-canvas{display:none;position:absolute;inset:0;}
 
 /* PLACEHOLDER */
-#cam-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:20px;background:var(--s1);}
+#cam-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:20px;background:var(--s1);z-index:2;}
 #cam-placeholder svg{opacity:0.15;width:56px;height:56px;}
-#cam-placeholder p{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,215,0,0.3);text-align:center;padding:0 24px;line-height:1.7;}
-
-/* CAMERA ID — bold center top of video */
-#cam-id-overlay{
-  position:absolute;top:16px;left:50%;transform:translateX(-50%);
-  z-index:20;display:none;
-  font-family:'Share Tech Mono',monospace;font-size:1.15rem;font-weight:700;
-  letter-spacing:0.25em;text-transform:uppercase;color:#FFD700;
-  background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);
-  padding:8px 22px;border-radius:30px;
-  border:1.5px solid rgba(255,215,0,0.55);
-  box-shadow:0 0 24px rgba(255,215,0,0.3);
-  text-shadow:0 0 14px rgba(255,215,0,0.8);
-  white-space:nowrap;pointer-events:none;
-}
+#cam-placeholder p{font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,215,0,0.3);text-align:center;padding:0 24px;line-height:1.9;}
 
 /* LIVE badge */
 #live-badge{position:absolute;bottom:14px;left:14px;display:none;align-items:center;gap:6px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);border:1px solid rgba(255,59,59,0.5);border-radius:8px;padding:4px 10px;font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.14em;color:#fff;z-index:6;}
@@ -127,35 +115,35 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 </head>
 <body>
 <div id="app">
-
-  <!-- TOP BAR -->
   <div id="top-bar">
     <img id="logo" src="https://i.ibb.co/gFMKLNWd/Chat-GPT-Image-Dec-31-2025-01-45-02-AM-Photoroom.png" alt="Yamassee">
-    <div id="conn-status" class="offline">
-      <div class="dot"></div>
-      <span id="conn-text">Offline</span>
-    </div>
+    <div id="conn-status" class="offline"><div class="dot"></div><span id="conn-text">Offline</span></div>
   </div>
 
-  <!-- TABS -->
   <div id="role-tabs">
     <button class="rtab active" id="tab-camera" onclick="switchRole('camera')">📷 Room Camera</button>
     <button class="rtab"        id="tab-viewer" onclick="switchRole('viewer')">👁 Viewer</button>
   </div>
 
-  <!-- VIEWER: enter Camera ID -->
-  <div id="viewer-panel">
-    <input id="cam-id-input" type="text" placeholder="Enter Camera ID" maxlength="20" oninput="this.value=this.value.toUpperCase()">
-    <button id="watch-btn" onclick="startWatching()">Watch</button>
+  <!-- SIGNAL BOX: shown during connection setup -->
+  <div id="signal-box">
+    <div id="sig-step">Tap Start Camera first</div>
+    <label id="sig-label-out"></label>
+    <div class="sig-row">
+      <textarea id="sig-out" readonly placeholder="Code appears here..."></textarea>
+      <button class="sig-btn" id="sig-copy-btn" onclick="copySignal()" style="display:none">📋 Copy</button>
+    </div>
+    <label id="sig-label-in" style="display:none"></label>
+    <div class="sig-row" id="sig-in-row" style="display:none">
+      <textarea id="sig-in" placeholder="Paste code here..."></textarea>
+      <button class="sig-btn go" onclick="applySignal()">Connect ▶</button>
+    </div>
   </div>
 
-  <!-- CAMERA + CONTROLS -->
   <div id="cam-section">
     <div id="cam-wrapper">
-      <video id="camera-feed" autoplay muted playsinline></video>
+      <video id="camera-feed" autoplay playsinline></video>
       <canvas id="motion-canvas"></canvas>
-
-      <!-- Placeholder -->
       <div id="cam-placeholder">
         <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="4" y="14" width="56" height="36" rx="6" stroke="#FFD700" stroke-width="2.5"/>
@@ -165,45 +153,22 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
         </svg>
         <p id="placeholder-msg">Tap Start Camera to begin</p>
       </div>
-
-      <!-- Camera ID + copy button on video -->
-      <div id="cam-id-overlay"></div>
-      <button id="copy-id-btn" onclick="copyId()" style="
-        display:none;position:absolute;top:16px;right:14px;z-index:20;
-        font-family:'Share Tech Mono',monospace;font-size:0.7rem;font-weight:700;
-        letter-spacing:0.1em;text-transform:uppercase;color:#FFD700;
-        background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);
-        padding:7px 14px;border-radius:20px;
-        border:1.5px solid rgba(255,215,0,0.5);
-        box-shadow:0 0 16px rgba(255,215,0,0.2);
-        cursor:pointer;transition:all 0.2s;white-space:nowrap;
-      ">📋 Copy ID</button>
-
-      <!-- LIVE badge -->
       <div id="live-badge"><div class="ldot"></div>LIVE</div>
-
-      <!-- Stats -->
       <div id="cam-stats">
         <div class="stat-chip" id="stat-motion">MOTION: —</div>
         <div class="stat-chip" id="stat-sound">SOUND: —</div>
       </div>
-
-      <!-- Alert flash -->
       <div id="alert-flash"></div>
     </div>
 
-    <!-- CONTROLS -->
     <div id="ctrl-bar">
       <button class="ctrl-btn primary" id="start-btn" onclick="startCamera()">Start Camera</button>
-      <button class="ctrl-btn danger"  id="stop-btn"  onclick="stopCamera()" disabled>Stop</button>
+      <button class="ctrl-btn danger"  id="stop-btn"  onclick="stopAll()" disabled>Stop</button>
       <div id="sens-group">
         <div id="sens-label">Sensitivity <span id="sens-val">5</span></div>
         <input type="range" id="sensitivity" min="1" max="10" value="5" oninput="updateSens(this.value)">
       </div>
-      <div id="alert-bar">
-        <div class="ab-dot"></div>
-        <span id="alert-text">No Alerts</span>
-      </div>
+      <div id="alert-bar"><div class="ab-dot"></div><span id="alert-text">No Alerts</span></div>
     </div>
   </div>
 </div>
@@ -211,32 +176,42 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 
 <script>
 /* ============================================================
-  YAMASSEE SMART MONITOR
-  Uses PeerJS (free hosted signaling) — works on GitHub Pages,
-  no server needed, works across any device/network.
+   YAMASSEE SMART MONITOR
+   Zero servers. Zero third parties. Zero accounts.
+   
+   Uses manual WebRTC signaling — you copy a code from the
+   camera and paste it into the viewer. One time per session.
+   Works on GitHub Pages, works anywhere, completely free.
 
-  CAMERA SIDE:
-    - Opens camera, gets a short Peer ID
-    - Displays that ID on the video feed
-    - Waits for viewers to call in
+   HOW TO CONNECT:
+   CAMERA DEVICE:
+     1. Tap "Start Camera"
+     2. Copy the OFFER code that appears
+     3. Send it to the viewer (text/email/airdrop/whatever)
+     4. Wait for viewer to send back an ANSWER code
+     5. Paste the answer code → Connected!
 
-  VIEWER SIDE:
-    - Enters the Camera ID from the camera screen
-    - Connects via WebRTC through PeerJS
-    - Motion + sound detection runs HERE on the viewer
-
-  HOW TO USE:
-    1. Camera device: open app → Start Camera → note the ID on screen
-    2. Viewer device: open app → Viewer tab → type that ID → Watch
+   VIEWER DEVICE:
+     1. Switch to Viewer tab
+     2. Paste the OFFER code from camera
+     3. Tap Connect — an ANSWER code appears
+     4. Send that answer back to camera
+     5. Camera pastes it → Connected!
 ============================================================ */
 
-// ── DOM ─────────────────────────────────────────────────────
+const ICE = { iceServers:[
+  {urls:'stun:stun.l.google.com:19302'},
+  {urls:'stun:stun1.l.google.com:19302'},
+  {urls:'stun:stun2.l.google.com:19302'},
+  {urls:'stun:stun3.l.google.com:19302'}
+]};
+
+// ── DOM ──────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 const video       = $('camera-feed');
 const canvas      = $('motion-canvas');
 const placeholder = $('cam-placeholder');
 const liveBadge   = $('live-badge');
-const idOverlay   = $('cam-id-overlay');
 const alertBar    = $('alert-bar');
 const alertText   = $('alert-text');
 const alertFlash  = $('alert-flash');
@@ -246,12 +221,15 @@ const statMotion  = $('stat-motion');
 const statSound   = $('stat-sound');
 const startBtn    = $('start-btn');
 const stopBtn     = $('stop-btn');
+const signalBox   = $('signal-box');
+const sigOut      = $('sig-out');
+const sigIn       = $('sig-in');
 
 // ── STATE ────────────────────────────────────────────────────
 let role        = 'camera';
-let peer        = null;   // PeerJS instance
-let localStream = null;
 let sensitivity = 5;
+let pc          = null;
+let localStream = null;
 let motionCtx   = null;
 let prevFrame   = null;
 let frameLoop   = null;
@@ -259,366 +237,302 @@ let audioCtx    = null;
 let analyser    = null;
 let lastMotion  = 0;
 let lastSound   = 0;
-let activeCall  = null;   // current PeerJS call
 
 // ── UTILITIES ────────────────────────────────────────────────
-function toast(msg, type='') {
-  const t = document.createElement('div');
-  t.className = 'toast '+type;
-  t.textContent = msg;
+function toast(msg, type=''){
+  const t=document.createElement('div');
+  t.className='toast '+type; t.textContent=msg;
   $('toast-stack').prepend(t);
-  setTimeout(()=>t.remove(), 3200);
+  setTimeout(()=>t.remove(),3200);
 }
-function setConn(cls, txt) { connStatus.className=cls; connText.textContent=txt; }
-function setAlert(type, msg) {
-  alertBar.className = type==='clear' ? '' : type+'-alert';
-  alertText.textContent = msg;
-  if (type!=='clear') {
-    alertFlash.className = type;
-    alertFlash.style.opacity = '1';
-    setTimeout(()=>{ alertFlash.style.opacity='0'; alertFlash.className=''; }, 700);
-    setTimeout(()=>setAlert('clear','No Alerts'), 4000);
+function setConn(cls,txt){ connStatus.className=cls; connText.textContent=txt; }
+function setAlert(type,msg){
+  alertBar.className=type==='clear'?'':type+'-alert';
+  alertText.textContent=msg;
+  if(type!=='clear'){
+    alertFlash.className=type; alertFlash.style.opacity='1';
+    setTimeout(()=>{alertFlash.style.opacity='0';alertFlash.className='';},700);
+    setTimeout(()=>setAlert('clear','No Alerts'),4000);
   }
 }
-function updateSens(v) {
-  sensitivity = parseInt(v);
-  $('sens-val').textContent = v;
-  $('sensitivity').style.background =
+function updateSens(v){
+  sensitivity=parseInt(v); $('sens-val').textContent=v;
+  $('sensitivity').style.background=
     `linear-gradient(to right,var(--gold-dim) 0%,var(--gold-dim) ${v*10}%,var(--s3) ${v*10}%,var(--s3) 100%)`;
 }
 updateSens(5);
+function showPlaceholder(msg){ $('placeholder-msg').textContent=msg; placeholder.style.display=''; }
+function hidePlaceholder(){ placeholder.style.display='none'; }
+
+// Compress/decompress signal codes so they're shorter to copy
+function encode(obj){ return btoa(JSON.stringify(obj)); }
+function decode(str){ return JSON.parse(atob(str.trim())); }
+
+function copySignal(){
+  navigator.clipboard.writeText(sigOut.value).then(()=>{
+    toast('✓ Code copied — send to other device','success');
+    $('sig-copy-btn').textContent='✓ Copied!';
+    setTimeout(()=>$('sig-copy-btn').textContent='📋 Copy',2000);
+  }).catch(()=>{
+    sigOut.select(); document.execCommand('copy');
+    toast('✓ Code copied','success');
+  });
+}
 
 // ── ROLE SWITCH ──────────────────────────────────────────────
-function switchRole(r) {
-  role = r;
-  $('tab-camera').classList.toggle('active', r==='camera');
-  $('tab-viewer').classList.toggle('active', r==='viewer');
-  $('viewer-panel').classList.toggle('show', r==='viewer');
-  startBtn.style.display = r==='camera' ? '' : 'none';
-  stopBtn.style.display  = r==='camera' ? '' : 'none';
-  $('sens-group').style.display = r==='camera' ? '' : 'none';
-  if (r==='viewer') {
-    stopCamera();
-    $('placeholder-msg').textContent = 'Enter the Camera ID above and tap Watch';
-    video.muted = false;
+function switchRole(r){
+  role=r;
+  $('tab-camera').classList.toggle('active',r==='camera');
+  $('tab-viewer').classList.toggle('active',r==='viewer');
+  startBtn.style.display = r==='camera'?'':'none';
+  stopBtn.style.display  = r==='camera'?'':'none';
+  $('sens-group').style.display = r==='camera'?'':'none';
+  stopAll();
+
+  if(r==='viewer'){
+    showPlaceholder('Paste the camera code below and tap Connect');
+    signalBox.classList.add('show');
+    $('sig-step').textContent='Step 1: Paste the OFFER code from the Camera device';
+    $('sig-label-out').textContent='';
+    sigOut.style.display='none';
+    $('sig-copy-btn').style.display='none';
+    $('sig-label-in').style.display='block';
+    $('sig-label-in').textContent='Camera Offer Code:';
+    $('sig-in-row').style.display='flex';
+    sigIn.value='';
+    sigIn.placeholder='Paste offer code from camera here...';
   } else {
-    stopDetection();
-    $('placeholder-msg').textContent = 'Tap Start Camera to begin';
-    video.muted = true;
+    showPlaceholder('Tap Start Camera to begin');
+    signalBox.classList.remove('show');
   }
 }
 
 // ── START CAMERA ─────────────────────────────────────────────
-async function startCamera() {
-  startBtn.disabled = true;
+async function startCamera(){
+  startBtn.disabled=true;
   setConn('connecting','Starting...');
-  $('placeholder-msg').textContent = 'Requesting camera access...';
 
-  // Get camera + mic
-  let stream;
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
-  } catch(e1) {
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video:true });
-      toast('Mic unavailable — video only','');
-    } catch(e2) {
-      startBtn.disabled = false;
-      setConn('offline','Offline');
-      $('placeholder-msg').textContent = 'Camera denied — check browser permissions';
-      toast('Camera access denied','error');
-      return;
+    localStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+  } catch(e1){
+    try{ localStream=await navigator.mediaDevices.getUserMedia({video:true}); }
+    catch(e2){
+      startBtn.disabled=false; setConn('offline','Offline');
+      showPlaceholder('Camera access denied\nCheck browser permissions');
+      toast('Camera denied','error'); return;
     }
   }
 
-  localStream = stream;
-  video.muted  = true;  // prevent mic feedback on camera device
-  video.srcObject = stream;
+  // Show local camera immediately
+  video.muted=true;
+  video.srcObject=localStream;
+  hidePlaceholder();
+  liveBadge.style.display='flex';
+  stopBtn.disabled=false;
+  startBtn.textContent='Restart';
+  startBtn.disabled=false;
+  setConn('connecting','Creating offer...');
 
-  // Show video immediately
-  placeholder.style.display = 'none';
-  liveBadge.style.display   = 'flex';
-  stopBtn.disabled  = false;
-  startBtn.textContent = 'Restart';
-  startBtn.disabled = false;
+  // Create peer connection
+  pc = new RTCPeerConnection(ICE);
+  localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));
 
-  // Create PeerJS peer — gets a free unique ID from PeerJS servers
-  setConn('connecting','Getting ID...');
-  $('placeholder-msg').textContent = '';
+  // Collect ALL ICE candidates before sending offer
+  // (trickle-free = simpler copy/paste flow)
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
 
-  if (peer) { peer.destroy(); peer = null; }
-
-  peer = new Peer({
-    host: '0.peerjs.com',
-    port: 443,
-    secure: true,
-    debug: 0,
-    config: {
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' }
-      ]
-    }
+  // Wait for ICE gathering to complete
+  await new Promise(resolve=>{
+    if(pc.iceGatheringState==='complete') return resolve();
+    pc.onicegatheringstatechange=()=>{ if(pc.iceGatheringState==='complete') resolve(); };
+    // Timeout safety — send after 3s regardless
+    setTimeout(resolve, 3000);
   });
 
-  peer.on('open', (id) => {
-    // Show the ID on the video feed — this is what viewer types in
-    // Show short display — copy button copies full ID
-    const shortDisplay = id.slice(-6).toUpperCase();
-    idOverlay.textContent = 'CAM: ' + shortDisplay;
-    idOverlay._fullId = id; // store full ID for copy
-    idOverlay.style.display = 'block';
-    $('copy-id-btn').style.display = 'block';
-    setConn('live', 'Broadcasting');
-    toast('Camera live! Tap Copy ID to share', 'success');
-  });
-
-  peer.on('error', (err) => {
-    toast('Connection error: '+err.type, 'error');
-    console.error('PeerJS error:', err);
-  });
-
-  // When a viewer calls in, answer with our stream
-  peer.on('call', (call) => {
-    activeCall = call;
-    call.answer(localStream);
-    toast('👁 Viewer connected', 'success');
-    call.on('close', ()=>toast('Viewer disconnected',''));
-    call.on('error', (e)=>console.warn('Call error:',e));
-  });
+  // Show the offer code for user to copy
+  const offerCode = encode(pc.localDescription);
+  signalBox.classList.add('show');
+  $('sig-step').textContent='Step 1: Copy this code → send it to the Viewer device';
+  $('sig-label-out').textContent='Your Offer Code (copy this):';
+  sigOut.style.display='block';
+  sigOut.value=offerCode;
+  $('sig-copy-btn').style.display='block';
+  $('sig-label-in').style.display='block';
+  $('sig-label-in').textContent='Step 2: Paste the Answer code from Viewer here:';
+  $('sig-in-row').style.display='flex';
+  sigIn.value='';
+  sigIn.placeholder='Paste answer code from viewer here...';
+  setConn('connecting','Waiting for viewer...');
+  toast('Copy the offer code and send it to the viewer device','');
 }
 
-// ── STOP CAMERA ──────────────────────────────────────────────
-function stopCamera() {
-  if (activeCall) { activeCall.close(); activeCall=null; }
-  if (peer)       { peer.destroy(); peer=null; }
-  if (localStream){ localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
-  video.srcObject = null;
-  video.muted = true;
-  placeholder.style.display = '';
-  liveBadge.style.display   = 'none';
-  idOverlay.style.display   = 'none';
-  idOverlay.textContent     = '';
-  $('copy-id-btn').style.display = 'none';
-  startBtn.textContent = 'Start Camera';
-  startBtn.disabled = false;
-  stopBtn.disabled  = true;
+// ── APPLY SIGNAL (called when paste + connect) ─────────────────
+async function applySignal(){
+  const raw = sigIn.value.trim();
+  if(!raw){ toast('Paste a code first','error'); return; }
+
+  let data;
+  try{ data=decode(raw); }
+  catch(e){ toast('Invalid code — make sure you copied it correctly','error'); return; }
+
+  // ── CAMERA: receiving viewer's ANSWER ──
+  if(role==='camera'){
+    if(!pc){ toast('Start camera first','error'); return; }
+    try{
+      await pc.setRemoteDescription(new RTCSessionDescription(data));
+      pc.onconnectionstatechange=()=>{
+        if(pc.connectionState==='connected'){
+          setConn('live','Broadcasting');
+          toast('✓ Viewer connected — live!','success');
+          signalBox.classList.remove('show');
+        }
+        if(pc.connectionState==='disconnected'||pc.connectionState==='failed'){
+          toast('Viewer disconnected','error');
+          setConn('live','Broadcasting (viewer left)');
+        }
+      };
+      toast('Answer applied — connecting...','success');
+    }catch(e){ toast('Failed to apply answer: '+e.message,'error'); }
+    return;
+  }
+
+  // ── VIEWER: receiving camera's OFFER ──
+  if(role==='viewer'){
+    stopDetection();
+    if(pc){ pc.close(); pc=null; }
+
+    pc=new RTCPeerConnection(ICE);
+
+    pc.ontrack=e=>{
+      if(e.streams&&e.streams[0]){
+        video.muted=false;
+        video.srcObject=e.streams[0];
+        hidePlaceholder();
+        liveBadge.style.display='flex';
+        setConn('watching','Watching');
+        toast('✓ Live feed connected!','success');
+        startDetection(e.streams[0]);
+      }
+    };
+
+    pc.onconnectionstatechange=()=>{
+      if(pc.connectionState==='disconnected'||pc.connectionState==='failed'){
+        showPlaceholder('Camera disconnected'); video.srcObject=null;
+        liveBadge.style.display='none'; setConn('offline','Disconnected');
+        stopDetection(); toast('Feed ended','error');
+      }
+    };
+
+    // Set the camera's offer
+    await pc.setRemoteDescription(new RTCSessionDescription(data));
+
+    // Create answer
+    const answer=await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    // Wait for ICE
+    await new Promise(resolve=>{
+      if(pc.iceGatheringState==='complete') return resolve();
+      pc.onicegatheringstatechange=()=>{ if(pc.iceGatheringState==='complete') resolve(); };
+      setTimeout(resolve,3000);
+    });
+
+    // Show answer code for viewer to copy back to camera
+    const answerCode=encode(pc.localDescription);
+    $('sig-step').textContent='Step 2: Copy this answer → paste it into the Camera device';
+    $('sig-label-out').textContent='Your Answer Code (copy this back to camera):';
+    sigOut.style.display='block';
+    sigOut.value=answerCode;
+    $('sig-copy-btn').style.display='block';
+    $('sig-label-in').style.display='none';
+    $('sig-in-row').style.display='none';
+    setConn('connecting','Waiting for camera to connect...');
+    showPlaceholder('Send the answer code to the Camera device\nThen the video will appear here');
+    toast('Copy the answer code and send it to the camera device','');
+  }
+}
+
+// ── STOP ─────────────────────────────────────────────────────
+function stopAll(){
+  stopDetection();
+  if(pc){pc.close();pc=null;}
+  if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null;}
+  video.srcObject=null; video.muted=true;
+  liveBadge.style.display='none';
+  sigOut.value=''; sigIn.value='';
+  startBtn.textContent='Start Camera';
+  startBtn.disabled=false; stopBtn.disabled=true;
   setConn('offline','Offline');
   setAlert('clear','No Alerts');
+  statMotion.textContent='MOTION: —';
+  statSound.textContent='SOUND: —';
+}
+
+// ── DETECTION (VIEWER SIDE) ───────────────────────────────────
+function startDetection(stream){
   stopDetection();
-  statMotion.textContent = 'MOTION: —';
-  statSound.textContent  = 'SOUND: —';
-}
-
-// ── VIEWER: CONNECT TO CAMERA ────────────────────────────────
-function startWatching() {
-  const camId = $('cam-id-input').value.trim();
-  if (!camId) { toast('Enter a Camera ID','error'); return; }
-
-  $('watch-btn').disabled = true;
-  setConn('connecting','Connecting...');
-  $('placeholder-msg').textContent = 'Connecting to camera...';
-  placeholder.style.display = '';
-
-  if (peer) { peer.destroy(); peer=null; }
-
-  // Create a viewer peer
-  peer = new Peer({
-    host: '0.peerjs.com',
-    port: 443,
-    secure: true,
-    debug: 0,
-    config: {
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' }
-      ]
+  canvas.width=160; canvas.height=120;
+  motionCtx=canvas.getContext('2d',{willReadFrequently:true});
+  prevFrame=null; motionLoop();
+  try{
+    const track=stream.getAudioTracks()[0];
+    if(track){
+      audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+      const src=audioCtx.createMediaStreamSource(new MediaStream([track]));
+      analyser=audioCtx.createAnalyser(); analyser.fftSize=512;
+      src.connect(analyser); soundLoop();
     }
-  });
-
-  peer.on('error', (err)=>{
-    toast('Could not connect: '+err.type,'error');
-    $('watch-btn').disabled = false;
-    setConn('offline','Offline');
-    $('placeholder-msg').textContent = 'Connection failed — check the Camera ID';
-  });
-
-  peer.on('open', async () => {
-    // Viewer needs a real stream to initiate call — use blank video track
-    let viewerStream;
-    try {
-      // Try to get a silent audio track so WebRTC handshake works properly
-      viewerStream = await navigator.mediaDevices.getUserMedia({ audio:true, video:false });
-    } catch(e) {
-      // Fallback — canvas-generated blank video stream
-      const blankCanvas = document.createElement('canvas');
-      blankCanvas.width=2; blankCanvas.height=2;
-      viewerStream = blankCanvas.captureStream(1);
-    }
-    const call = peer.call(camId, viewerStream);
-    activeCall = call;
-
-    if (!call) {
-      toast('Could not reach camera — is it online?','error');
-      $('watch-btn').disabled = false;
-      setConn('offline','Offline');
-      return;
-    }
-
-    // Receive the camera stream
-    call.on('stream', (remoteStream) => {
-      video.muted = false;
-      video.srcObject = remoteStream;
-      placeholder.style.display = 'none';
-      liveBadge.style.display   = 'flex';
-      setConn('watching','Watching');
-      $('watch-btn').disabled = false;
-      toast('✓ Live feed connected','success');
-
-      // ── DETECTION RUNS ON VIEWER SIDE ──
-      startDetection(remoteStream);
-    });
-
-    call.on('close', ()=>{
-      setConn('offline','Disconnected');
-      video.srcObject = null;
-      liveBadge.style.display = 'none';
-      placeholder.style.display = '';
-      $('placeholder-msg').textContent = 'Camera disconnected';
-      $('watch-btn').disabled = false;
-      stopDetection();
-      toast('Camera feed ended','error');
-    });
-
-    call.on('error', (e)=>{
-      toast('Stream error','error');
-      $('watch-btn').disabled = false;
-      console.error(e);
-    });
-
-    // Timeout if no stream arrives in 10s
-    setTimeout(()=>{
-      if (!video.srcObject) {
-        toast('No response — check Camera ID','error');
-        $('watch-btn').disabled = false;
-        setConn('offline','Offline');
-        $('placeholder-msg').textContent = 'No camera found with that ID';
-        call.close();
-      }
-    }, 10000);
-  });
+  }catch(e){console.warn('Audio detection unavailable');}
 }
-
-// ── DETECTION (runs on VIEWER) ────────────────────────────────
-function startDetection(stream) {
-  stopDetection();
-
-  // MOTION — canvas frame-diff on the video element
-  canvas.width  = 160;
-  canvas.height = 120;
-  motionCtx = canvas.getContext('2d', { willReadFrequently:true });
-  prevFrame = null;
-  motionLoop();
-
-  // SOUND — analyze incoming audio track
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const src = audioCtx.createMediaStreamSource(stream);
-    analyser  = audioCtx.createAnalyser();
-    analyser.fftSize = 512;
-    src.connect(analyser);
-    soundLoop();
-  } catch(e) {
-    console.warn('Audio detection unavailable:', e);
-  }
+function stopDetection(){
+  if(frameLoop){cancelAnimationFrame(frameLoop);frameLoop=null;}
+  if(audioCtx){try{audioCtx.close();}catch(e){} audioCtx=null;analyser=null;}
+  prevFrame=null;
 }
-
-function stopDetection() {
-  if (frameLoop) { cancelAnimationFrame(frameLoop); frameLoop=null; }
-  if (audioCtx)  { try{audioCtx.close();}catch(e){} audioCtx=null; analyser=null; }
-  prevFrame = null;
-}
-
-function motionLoop() {
-  if (!video.srcObject) return;
-  frameLoop = requestAnimationFrame(() => setTimeout(motionLoop, 120));
-  if (video.readyState < 2) return;
-
-  motionCtx.drawImage(video, 0, 0, 160, 120);
-  const cur = motionCtx.getImageData(0, 0, 160, 120);
-
-  if (prevFrame) {
-    const d1 = prevFrame.data, d2 = cur.data;
-    let changed = 0;
-    const total = d1.length / 4;
-    const thr   = 28 * (1 - (sensitivity-1)/12);
-
-    for (let i=0; i<d1.length; i+=4) {
-      if ((Math.abs(d1[i]-d2[i]) + Math.abs(d1[i+1]-d2[i+1]) + Math.abs(d1[i+2]-d2[i+2])) / 3 > thr)
-        changed++;
+function motionLoop(){
+  if(!video.srcObject){frameLoop=requestAnimationFrame(()=>setTimeout(motionLoop,300));return;}
+  frameLoop=requestAnimationFrame(()=>setTimeout(motionLoop,120));
+  if(video.readyState<2) return;
+  try{motionCtx.drawImage(video,0,0,160,120);}catch(e){return;}
+  const cur=motionCtx.getImageData(0,0,160,120);
+  if(prevFrame){
+    const d1=prevFrame.data,d2=cur.data;
+    let n=0; const total=d1.length/4;
+    const thr=28*(1-(sensitivity-1)/12);
+    for(let i=0;i<d1.length;i+=4){
+      if((Math.abs(d1[i]-d2[i])+Math.abs(d1[i+1]-d2[i+1])+Math.abs(d1[i+2]-d2[i+2]))/3>thr) n++;
     }
-
-    const ratio = changed / total;
-    const lvl   = Math.min(100, Math.round(ratio * 4500));
-    statMotion.textContent = 'MOTION: '+lvl+'%';
-    statMotion.classList.toggle('hot', lvl > 25);
-
-    const triggerPct = 0.012 * (1 - (sensitivity-1)/14);
-    const now = Date.now();
-    if (ratio > triggerPct && now - lastMotion > 2500) {
-      lastMotion = now;
-      fireAlert('motion', '⚡ Motion Detected');
+    const ratio=n/total;
+    const lvl=Math.min(100,Math.round(ratio*4500));
+    statMotion.textContent='MOTION: '+lvl+'%';
+    statMotion.classList.toggle('hot',lvl>25);
+    const now=Date.now();
+    if(ratio>0.012*(1-(sensitivity-1)/14)&&now-lastMotion>2500){
+      lastMotion=now; fireAlert('motion','⚡ Motion Detected');
     }
   }
-  prevFrame = cur;
+  prevFrame=cur;
 }
-
-function soundLoop() {
-  if (!audioCtx) return;
+function soundLoop(){
+  if(!audioCtx) return;
   requestAnimationFrame(soundLoop);
-
-  const data = new Uint8Array(analyser.frequencyBinCount);
+  const data=new Uint8Array(analyser.frequencyBinCount);
   analyser.getByteFrequencyData(data);
-  let sum = 0;
-  for (let i=0; i<data.length; i++) sum += data[i];
-  const avg = sum / data.length / 255;
-  const lvl = Math.min(100, Math.round(avg * 500));
-
-  statSound.textContent = 'SOUND: '+lvl+'%';
-  statSound.classList.toggle('hot', lvl > 30);
-
-  const thr = 0.10 * (1 - (sensitivity-1)/13);
-  const now = Date.now();
-  if (avg > thr && now - lastSound > 2000) {
-    lastSound = now;
-    fireAlert('sound', '🔊 Sound Detected');
+  let sum=0; for(let i=0;i<data.length;i++) sum+=data[i];
+  const avg=sum/data.length/255;
+  const lvl=Math.min(100,Math.round(avg*500));
+  statSound.textContent='SOUND: '+lvl+'%';
+  statSound.classList.toggle('hot',lvl>30);
+  const now=Date.now();
+  if(avg>0.10*(1-(sensitivity-1)/13)&&now-lastSound>2000){
+    lastSound=now; fireAlert('sound','🔊 Sound Detected');
   }
 }
-
-function copyId() {
-  const id = $('cam-id-overlay')._fullId || $('cam-id-overlay').textContent;
-  if (!id) return;
-  navigator.clipboard.writeText(id).then(()=>{
-    const btn = $('copy-id-btn');
-    btn.textContent = '✓ Copied!';
-    btn.style.color = '#39FF14';
-    btn.style.borderColor = 'rgba(57,255,20,0.5)';
-    setTimeout(()=>{
-      btn.textContent = '📋 Copy ID';
-      btn.style.color = '#FFD700';
-      btn.style.borderColor = 'rgba(255,215,0,0.5)';
-    }, 2000);
-  }).catch(()=>toast('Could not copy','error'));
+function fireAlert(type,msg){
+  setAlert(type,msg); toast('🔔 '+msg,type==='sound'?'error':'');
 }
 
-function fireAlert(type, msg) {
-  setAlert(type, msg);
-  toast('🔔 '+msg, type==='sound' ? 'error' : '');
-}
-
-// ── INIT ────────────────────────────────────────────────────
 switchRole('camera');
 </script>
 </body>
