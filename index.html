@@ -465,19 +465,23 @@ async function doConnect() {
     stopDetect();
 
     pc = new RTCPeerConnection(ICE_CFG);
+    let videoShown = false;
 
     pc.ontrack = e => {
-      // ontrack fires for each track — grab the stream on any call
-      const s = e.streams && e.streams[0] ? e.streams[0] : (feed.srcObject || new MediaStream([e.track]));
-      if (!feed.srcObject || !feed.srcObject.getVideoTracks().length) {
-        feed.muted = false;
-        feed.srcObject = s;
-        feed.play().catch(() => {});
-      }
-      if (e.track.kind === 'video') {
-        hideEmpty();
-        livebdg.style.display = 'flex';
-        setStat('watch', 'Watching');
+      // Assign stream immediately on ANY track — don't wait for video-only
+      const s = (e.streams && e.streams[0]) ? e.streams[0] : new MediaStream([e.track]);
+      feed.muted = false;
+      feed.srcObject = s;
+      feed.play().catch(() => {});
+
+      // Hide placeholder and show video — do this for every track event
+      hideEmpty();
+      livebdg.style.display = 'flex';
+      setStat('watch', 'Watching');
+
+      if (!videoShown) {
+        videoShown = true;
+        sigHide();
         toast('✓ Live feed connected!', 'ok');
         startDetect(s);
       }
@@ -499,16 +503,13 @@ async function doConnect() {
     await pc.setLocalDescription(answer);
     await waitForICE(pc);
 
-    // Show answer code for viewer to send back to camera
+    // Show answer code — do NOT call showEmpty here, leave video area alone
     sigShow(
-      '📋 Copy this Answer code → send back to Camera device\nThen paste it into the camera and tap Go ▶',
+      '📋 Copy this Answer code → send back to Camera device
+Then paste it into the camera and tap Go ▶',
       enc(pc.localDescription),
       false
     );
-    // Only show placeholder if video not already playing
-    if (!feed.srcObject) {
-      showEmpty('Send the Answer code to the Camera device\nVideo will appear here once connected');
-    }
     setStat('busy', 'Waiting for camera...');
     toast('Copy the Answer code and send it back to camera', '');
   }
