@@ -717,6 +717,7 @@ function startDetect(s) {
     var tracks = s.getAudioTracks();
     if (tracks.length > 0) {
       actx = new (window.AudioContext || window.webkitAudioContext)();
+      actx.resume(); // fix: mobile suspends AudioContext by default
       var src = actx.createMediaStreamSource(new MediaStream([tracks[0]]));
       analyser = actx.createAnalyser();
       analyser.fftSize = 512;
@@ -790,4 +791,3 @@ setRole('camera');
 </script>
 </body>
 </html>
-
