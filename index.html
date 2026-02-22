@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Yamassee Smart Monitor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -43,7 +44,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 #connect-panel{display:none;flex-direction:column;gap:10px;padding:12px 14px;
   background:var(--s1);border-bottom:1px solid var(--border);flex-shrink:0;}
 #connect-panel.show{display:flex;}
-/* Camera side */
 #room-display{display:none;flex-direction:column;gap:6px;}
 #room-label{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,215,0,0.45);}
 #room-code-wrap{display:flex;align-items:center;gap:12px;}
@@ -55,7 +55,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 #room-wait{font-family:var(--mono);font-size:0.68rem;letter-spacing:0.08em;
   color:rgba(255,215,0,0.55);display:flex;align-items:center;gap:6px;}
 #room-wait .rdot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 1s infinite;}
-/* Viewer side */
 #join-wrap{display:none;flex-direction:column;gap:8px;}
 #join-label{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,215,0,0.45);}
 #join-row{display:flex;gap:8px;align-items:stretch;}
@@ -63,12 +62,11 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   border-radius:8px;font-family:var(--mono);font-size:1.6rem;font-weight:700;letter-spacing:0.3em;
   padding:8px 14px;outline:none;text-transform:uppercase;text-align:center;}
 #room-input:focus{border-color:var(--gold-dim);}
-#room-input::placeholder{color:rgba(255,215,0,0.15);font-size:0.9rem;letter-spacing:0.1em;}
+#room-input::placeholder{color:rgba(255,215,0,0.15);font-size:0.85rem;letter-spacing:0.1em;}
 #btn-join{padding:0 20px;font-family:var(--ui);font-size:0.9rem;font-weight:700;letter-spacing:0.08em;
   text-transform:uppercase;background:rgba(57,255,20,0.08);color:var(--green);
   border:1px solid rgba(57,255,20,0.4);border-radius:8px;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
 #btn-join:hover{background:rgba(57,255,20,0.18);}
-/* Video */
 #cam-section{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 14px 6px;}
 #cam-wrap{flex:1;min-height:0;position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--border);background:#000;}
 #cam-wrap::before,#cam-wrap::after{content:'';position:absolute;width:18px;height:18px;
@@ -144,18 +142,16 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
     <button class="tab" id="tview" onclick="setRole('viewer')">👁 Viewer</button>
   </div>
   <div id="connect-panel">
-    <!-- Camera: show room code -->
     <div id="room-display">
-      <div id="room-label">Room Code — give this to the Viewer device:</div>
+      <div id="room-label">Room Code — give this to the Viewer:</div>
       <div id="room-code-wrap">
         <div id="room-code">------</div>
         <button id="btn-copy-room" onclick="copyCode()">📋 Copy</button>
       </div>
       <div id="room-wait"><div class="rdot"></div><span id="room-wait-txt">Waiting for viewer...</span></div>
     </div>
-    <!-- Viewer: type room code -->
     <div id="join-wrap">
-      <div id="join-label">Enter the 6-letter code from the Camera device:</div>
+      <div id="join-label">Enter the 6-character Room Code from the Camera:</div>
       <div id="join-row">
         <input id="room-input" type="text" maxlength="6" placeholder="ABC123"
           autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
@@ -198,41 +194,38 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
 <div id="toasts"></div>
 
 <script>
-/*
-  YAMASSEE SMART MONITOR
-  ══════════════════════════════════════════════════════
-  RELAY:  dweet.io  —  free, no account, pure REST HTTP
-          Works in every browser. No library needed.
-          Camera POSTs offer → Viewer GETs offer
-          Viewer POSTs answer → Camera GETs answer
+// ═══════════════════════════════════════════════════════════════════════
+//  YAMASSEE SMART MONITOR
+//
+//  RELAY: HiveMQ public MQTT broker (free, no account, WebSocket)
+//         broker.hivemq.com:8884 — WSS
+//         MQTT.js loaded from cdnjs above
+//
+//  SIGNALING:
+//    Camera generates 6-char code → publishes offer to topic
+//    Viewer types code → subscribes to topic → gets offer instantly
+//    Viewer publishes answer → camera gets it → WebRTC connects
+//
+//  DETECTION (viewer side):
+//    Motion: canvas pixel diff on remote video — no permissions needed
+//    Sound:  AudioContext created inside Connect button tap (user gesture)
+//            Connected to remote stream audio track when track arrives
+// ═══════════════════════════════════════════════════════════════════════
 
-  FLOW:
-  Camera  → Start Camera → 6-char code appears → tell viewer the code
-  Viewer  → tap Viewer tab → type code → tap Connect ▶ → video appears
-  Alerts  → fire on the VIEWER device (motion + sound detection)
-
-  AUDIOCONTEXT FIX (Android/Windows Chrome):
-  AudioContext is created INSIDE the Connect button tap handler.
-  This is the only place it will work without being blocked.
-  ══════════════════════════════════════════════════════
-*/
-
-// dweet.io: free IoT data relay. No account. No API key.
-// POST https://dweet.io/dweet/for/{name}  — write data
-// GET  https://dweet.io/get/latest/dweet/for/{name}  — read latest
-var DWEET = 'https://dweet.io';
+var BROKER  = 'wss://broker.hivemq.com:8884/mqtt';
+var TOPIC   = 'yamassee-monitor-v3/';   // prefix for all topics
 
 var ICE = { iceServers: [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
   { urls: 'stun:stun2.l.google.com:19302' },
   { urls: 'stun:stun3.l.google.com:19302' },
-  { urls: 'turn:openrelay.metered.ca:80',                username:'openrelayproject', credential:'openrelayproject' },
-  { urls: 'turn:openrelay.metered.ca:443',               username:'openrelayproject', credential:'openrelayproject' },
-  { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject' }
+  { urls: 'turn:openrelay.metered.ca:80',                username:'openrelayproject',credential:'openrelayproject'},
+  { urls: 'turn:openrelay.metered.ca:443',               username:'openrelayproject',credential:'openrelayproject'},
+  { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject',credential:'openrelayproject'}
 ]};
 
-// DOM refs
+// DOM
 var feed        = document.getElementById('feed');
 var mcanvas     = document.getElementById('mcanvas');
 var empty       = document.getElementById('empty');
@@ -251,129 +244,149 @@ var roomCodeEl  = document.getElementById('room-code');
 var roomWaitTxt = document.getElementById('room-wait-txt');
 
 // State
-var ROLE      = 'camera';
-var pc        = null;
-var stream    = null;
-var pollTimer = null;
-var roomCode  = null;   // 6-char string, e.g. "AB3X9K"
-var sens      = 5;
-var mctx      = null;
-var prev      = null;
-var floop     = null;
-var actx      = null;   // AudioContext — MUST be created inside a button tap
-var analyser  = null;
-var tLM       = 0;
-var tLS       = 0;
+var ROLE     = 'camera';
+var pc       = null;
+var stream   = null;
+var mqCl     = null;   // MQTT client
+var roomCode = null;
+var actx     = null;   // AudioContext — created inside button tap only
+var analyser = null;
+var sens     = 5;
+var mctx     = null;
+var prev     = null;
+var floop    = null;
+var tLM      = 0;
+var tLS      = 0;
 
 // ─── HELPERS ────────────────────────────────────────────────────────────
 
 function toast(msg, cls) {
   var d = document.createElement('div');
-  d.className = 'toast ' + (cls || '');
+  d.className = 'toast ' + (cls||'');
   d.textContent = msg;
   document.getElementById('toasts').prepend(d);
-  setTimeout(function() { if (d.parentNode) d.parentNode.removeChild(d); }, 3500);
+  setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, 3500);
 }
-
-function setStat(cls, txt) { statusEl.className = cls || ''; stxt.textContent = txt; }
-function showEmpty(msg)    { emsg.textContent = msg; empty.classList.remove('hidden'); }
-function hideEmpty()       { empty.classList.add('hidden'); }
+function setStat(c,t){ statusEl.className=c||''; stxt.textContent=t; }
+function showEmpty(m){ emsg.textContent=m; empty.classList.remove('hidden'); }
+function hideEmpty() { empty.classList.add('hidden'); }
 
 function setAlert(type, msg) {
-  if (type === 'clear') { alertbar.className = ''; alrt.textContent = 'No Alerts'; return; }
-  alertbar.className = type + '-alert';
-  alrt.textContent = msg || type;
-  flashEl.className = type; flashEl.style.opacity = '1';
-  setTimeout(function() { flashEl.style.opacity='0'; flashEl.className=''; }, 700);
-  setTimeout(function() { setAlert('clear'); }, 4000);
+  if (type==='clear'){ alertbar.className=''; alrt.textContent='No Alerts'; return; }
+  alertbar.className = type+'-alert';
+  alrt.textContent = msg||type;
+  flashEl.className = type; flashEl.style.opacity='1';
+  setTimeout(function(){ flashEl.style.opacity='0'; flashEl.className=''; }, 700);
+  setTimeout(function(){ setAlert('clear'); }, 4000);
 }
 
 function setSens(v) {
-  sens = parseInt(v);
-  document.getElementById('sval').textContent = v;
-  var pct = v * 10;
-  document.getElementById('sens').style.background =
-    'linear-gradient(to right,var(--gold-dim) 0%,var(--gold-dim) '+pct+'%,var(--s3) '+pct+'%,var(--s3) 100%)';
+  sens=parseInt(v);
+  document.getElementById('sval').textContent=v;
+  var p=v*10;
+  document.getElementById('sens').style.background=
+    'linear-gradient(to right,var(--gold-dim) 0%,var(--gold-dim) '+p+'%,var(--s3) '+p+'%,var(--s3) 100%)';
 }
 setSens(5);
 
 function makeCode() {
-  // 6 chars, no ambiguous letters (0/O, 1/I)
-  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  var c = '';
-  for (var i = 0; i < 6; i++) c += chars[Math.floor(Math.random() * chars.length)];
-  return c;
+  var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s='';
+  for(var i=0;i<6;i++) s+=c[Math.floor(Math.random()*c.length)];
+  return s;
 }
 
-function copyCode() {
-  if (!roomCode) return;
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(roomCode)
-      .then(function() { toast('Copied: ' + roomCode, 'ok'); });
-  } else {
-    toast('Code: ' + roomCode, 'ok');
-  }
+function copyCode(){
+  if(!roomCode) return;
+  if(navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(roomCode).then(function(){ toast('Copied: '+roomCode,'ok'); });
+  else toast('Code: '+roomCode,'ok');
 }
 
-function stopPoll() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
-
-function waitForICE(peerConn) {
-  return new Promise(function(resolve) {
-    if (peerConn.iceGatheringState === 'complete') { resolve(); return; }
-    var done = false;
-    function finish() { if (!done) { done = true; resolve(); } }
-    peerConn.addEventListener('icegatheringstatechange', function() {
-      if (peerConn.iceGatheringState === 'complete') finish();
-    });
-    setTimeout(finish, 6000); // 6s max — then proceed with whatever we have
+function waitForICE(p) {
+  return new Promise(function(resolve){
+    if(p.iceGatheringState==='complete'){ resolve(); return; }
+    var done=false;
+    function fin(){ if(!done){ done=true; resolve(); } }
+    p.addEventListener('icegatheringstatechange',function(){ if(p.iceGatheringState==='complete') fin(); });
+    setTimeout(fin, 6000);
   });
 }
 
-// ─── DWEET.IO RELAY ─────────────────────────────────────────────────────
-// Thing names: ym-o-{code} = offer,  ym-a-{code} = answer
-// These are unique enough to avoid accidental collisions.
+// ─── MQTT ───────────────────────────────────────────────────────────────
 
-function dweetWrite(thingName, data) {
-  return fetch(DWEET + '/dweet/for/' + thingName, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  }).then(function(r) {
-    if (!r.ok) throw new Error('dweet write HTTP ' + r.status);
-    return r.json();
+function mqConnect(onReady) {
+  if (mqCl) { try{ mqCl.end(true); }catch(e){} mqCl=null; }
+
+  setStat('busy', 'Connecting to relay...');
+  var cid = 'ym-'+(Math.random().toString(36).substr(2,9));
+
+  mqCl = mqtt.connect(BROKER, {
+    clientId: cid,
+    clean: true,
+    keepalive: 30,
+    reconnectPeriod: 0,
+    connectTimeout: 8000
+  });
+
+  mqCl.on('connect', function(){
+    setStat('busy', 'Relay connected');
+    onReady();
+  });
+
+  mqCl.on('error', function(e){
+    toast('Relay error: '+e.message,'err');
+    setStat('','Offline');
+    bstart.disabled=false;
+    bstart.textContent='Start Camera';
+    document.getElementById('btn-join').disabled=false;
+  });
+
+  mqCl.on('close', function(){
+    // only log — don't error if we deliberately closed
   });
 }
 
-function dweetRead(thingName) {
-  // Returns the content object, or null if nothing stored yet
-  return fetch(DWEET + '/get/latest/dweet/for/' + thingName)
-    .then(function(r) {
-      if (!r.ok) throw new Error('dweet read HTTP ' + r.status);
-      return r.json();
-    })
-    .then(function(j) {
-      // j.this === 'succeeded', j.with is array of dweets
-      if (j && j.with && j.with.length > 0) {
-        return j.with[0].content; // the actual data we stored
-      }
-      return null;
-    });
+function mqSend(subtopic, payload) {
+  // retain=true so late subscriber gets it immediately
+  if(!mqCl) return;
+  mqCl.publish(TOPIC+subtopic, JSON.stringify(payload), {qos:1, retain:true});
+}
+
+function mqClearRetain(subtopic) {
+  if(!mqCl) return;
+  // Empty retained payload clears it from broker
+  mqCl.publish(TOPIC+subtopic, '', {qos:1, retain:true});
+}
+
+function mqListen(subtopic, cb) {
+  if(!mqCl) return;
+  var full = TOPIC+subtopic;
+  mqCl.subscribe(full, {qos:1});
+  mqCl.on('message', function(t, buf){
+    if(t!==full) return;
+    if(!buf||buf.length===0) return; // empty = retain clear, ignore
+    try { cb(JSON.parse(buf.toString())); } catch(e){}
+  });
+}
+
+function mqStop() {
+  if(mqCl){ try{ mqCl.end(true); }catch(e){} mqCl=null; }
 }
 
 // ─── ROLE SWITCH ────────────────────────────────────────────────────────
 
 function setRole(r) {
-  ROLE = r;
-  document.getElementById('tcam').classList.toggle('on', r === 'camera');
-  document.getElementById('tview').classList.toggle('on', r === 'viewer');
-  bstart.style.display = r === 'camera' ? '' : 'none';
-  bstop.style.display  = r === 'camera' ? '' : 'none';
-  document.getElementById('sensbox').style.display = r === 'camera' ? '' : 'none';
+  ROLE=r;
+  document.getElementById('tcam').classList.toggle('on',r==='camera');
+  document.getElementById('tview').classList.toggle('on',r==='viewer');
+  bstart.style.display=r==='camera'?'':'none';
+  bstop.style.display=r==='camera'?'':'none';
+  document.getElementById('sensbox').style.display=r==='camera'?'':'none';
   stopAll();
-  if (r === 'viewer') {
+  if(r==='viewer'){
     document.getElementById('connect-panel').classList.add('show');
-    document.getElementById('room-display').style.display = 'none';
-    document.getElementById('join-wrap').style.display = 'flex';
+    document.getElementById('room-display').style.display='none';
+    document.getElementById('join-wrap').style.display='flex';
     showEmpty('Type the room code above and tap Connect');
   } else {
     document.getElementById('connect-panel').classList.remove('show');
@@ -384,325 +397,287 @@ function setRole(r) {
 // ─── CAMERA ─────────────────────────────────────────────────────────────
 
 function startCam() {
-  bstart.disabled = true;
-  setStat('busy', 'Starting...');
+  bstart.disabled=true;
+  setStat('busy','Starting...');
   showEmpty('Requesting camera...');
 
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: true })
-    .catch(function() {
-      return navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    })
-    .then(function(s) {
-      stream = s;
-      feed.srcObject = stream;
-      feed.muted = true;
-      var p = feed.play(); if (p) p.catch(function(){});
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:true})
+    .catch(function(){ return navigator.mediaDevices.getUserMedia({video:true,audio:false}); })
+    .then(function(s){
+      stream=s;
+      feed.srcObject=stream; feed.muted=true;
+      var p=feed.play(); if(p) p.catch(function(){});
       hideEmpty();
-      livebadge.style.display = 'flex';
-      bstop.disabled  = false;
-      bstart.disabled = false;
-      bstart.textContent = 'Restart';
-      setStat('busy', 'Setting up room...');
-      setupCameraPC();
+      livebadge.style.display='flex';
+      bstop.disabled=false;
+      bstart.disabled=false; bstart.textContent='Restart';
+      // Connect MQTT then set up WebRTC
+      mqConnect(function(){ setupCameraPC(); });
     })
-    .catch(function(err) {
-      bstart.disabled = false;
-      setStat('', 'Offline');
+    .catch(function(e){
+      bstart.disabled=false; setStat('','Offline');
       showEmpty('Camera denied — check browser permissions');
-      toast('Camera access denied: ' + err.message, 'err');
+      toast('Camera error: '+e.message,'err');
     });
 }
 
 function setupCameraPC() {
   roomCode = makeCode();
-  var offerThing  = 'ym-o-' + roomCode;
-  var answerThing = 'ym-a-' + roomCode;
+  var offerTopic  = roomCode+'/offer';
+  var answerTopic = roomCode+'/answer';
+
+  // Clear any old retained messages for this code
+  mqClearRetain(offerTopic);
+  mqClearRetain(answerTopic);
 
   pc = new RTCPeerConnection(ICE);
-  stream.getTracks().forEach(function(t) { pc.addTrack(t, stream); });
+  stream.getTracks().forEach(function(t){ pc.addTrack(t,stream); });
 
-  pc.onconnectionstatechange = function() {
-    if (pc.connectionState === 'connected') {
-      setStat('live', 'Broadcasting');
-      stopPoll();
+  pc.onconnectionstatechange=function(){
+    if(pc.connectionState==='connected'){
+      setStat('live','Broadcasting');
+      // Clean up retained MQTT messages
+      mqClearRetain(offerTopic);
+      mqClearRetain(answerTopic);
       document.getElementById('connect-panel').classList.remove('show');
-      toast('Viewer connected — live!', 'ok');
+      toast('Viewer connected — live!','ok');
     }
-    if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-      setStat('busy', 'Viewer left');
-      toast('Viewer disconnected', '');
+    if(pc.connectionState==='disconnected'||pc.connectionState==='failed'){
+      setStat('busy','Viewer left');
+      toast('Viewer disconnected','');
     }
   };
 
-  // Build offer
+  setStat('busy','Building offer...');
   pc.createOffer()
-    .then(function(offer) { return pc.setLocalDescription(offer); })
-    .then(function() {
-      setStat('busy', 'Gathering ICE candidates...');
+    .then(function(o){ return pc.setLocalDescription(o); })
+    .then(function(){
+      setStat('busy','Gathering ICE...');
       return waitForICE(pc);
     })
-    .then(function() {
-      // POST offer to dweet — include timestamp so viewer can reject stale offers
-      var offerData = {
-        type: pc.localDescription.type,
-        sdp:  pc.localDescription.sdp,
-        ts:   Date.now()
-      };
-      return dweetWrite(offerThing, offerData);
-    })
-    .then(function() {
-      // Show room code — only happens AFTER offer is successfully posted
-      roomCodeEl.textContent = roomCode;
-      document.getElementById('connect-panel').classList.add('show');
-      document.getElementById('room-display').style.display = 'flex';
-      setStat('busy', 'Waiting for viewer...');
-      toast('Room ready! Code: ' + roomCode, 'ok');
+    .then(function(){
+      // Subscribe to answer BEFORE publishing offer (avoid race)
+      mqListen(answerTopic, function(data){
+        if(!pc || pc.signalingState!=='have-local-offer') return;
+        setStat('busy','Viewer found — connecting...');
+        roomWaitTxt.textContent='Viewer found — connecting...';
+        pc.setRemoteDescription(new RTCSessionDescription(data))
+          .catch(function(e){ toast('Connect error: '+e.message,'err'); });
+      });
 
-      // Poll for viewer's answer every 2 seconds
-      pollTimer = setInterval(function() {
-        if (!pc) { stopPoll(); return; }
-        dweetRead(answerThing)
-          .then(function(data) {
-            if (!data || !data.type || data.type !== 'answer') return;
-            // Got an answer — only accept if it's fresh (< 5 minutes old)
-            if (Date.now() - data.ts > 300000) return;
-            stopPoll();
-            roomWaitTxt.textContent = 'Viewer found — connecting...';
-            pc.setRemoteDescription(new RTCSessionDescription({
-              type: data.type, sdp: data.sdp
-            })).catch(function(e) {
-              toast('Connection error: ' + e.message, 'err');
-            });
-          })
-          .catch(function() {}); // silent retry
-      }, 2000);
+      // Publish offer with retain so viewer gets it the moment they subscribe
+      mqSend(offerTopic, {type:pc.localDescription.type, sdp:pc.localDescription.sdp});
+
+      // Show room code — we only get here if MQTT connected successfully
+      roomCodeEl.textContent=roomCode;
+      document.getElementById('connect-panel').classList.add('show');
+      document.getElementById('room-display').style.display='flex';
+      roomWaitTxt.textContent='Waiting for viewer to join...';
+      setStat('busy','Waiting for viewer...');
+      toast('Room ready — Code: '+roomCode,'ok');
     })
-    .catch(function(err) {
-      setStat('', 'Offline');
+    .catch(function(e){
+      setStat('','Offline');
       showEmpty('Tap Start Camera to begin');
-      toast('Setup failed: ' + err.message + ' — check internet', 'err');
-      bstart.disabled = false;
-      bstart.textContent = 'Start Camera';
+      bstart.disabled=false; bstart.textContent='Start Camera';
+      toast('Setup failed: '+e.message,'err');
     });
 }
 
 // ─── VIEWER ─────────────────────────────────────────────────────────────
 
 function joinRoom() {
-  var code = document.getElementById('room-input').value.trim().toUpperCase();
-  if (code.length !== 6) { toast('Enter all 6 characters', 'err'); return; }
+  var code=document.getElementById('room-input').value.trim().toUpperCase();
+  if(code.length!==6){ toast('Enter all 6 characters','err'); return; }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // AUDIOCONTEXT — created HERE, inside the button tap (user gesture).
-  // This is the ONLY place Android/Chrome will allow it without blocking.
-  // We create it now, store it globally, and connect the stream to it
-  // later when the WebRTC track arrives.
-  // ═══════════════════════════════════════════════════════════════════════
+  // ████████████████████████████████████████████████████████████████████
+  // AudioContext MUST be created here — inside the button click handler.
+  // This is the ONLY moment Android Chrome allows it without blocking.
+  // We create it now, store globally, plug the audio stream in later.
+  // ████████████████████████████████████████████████████████████████████
   try {
-    if (actx) { try { actx.close(); } catch(e){} actx = null; }
-    actx = new (window.AudioContext || window.webkitAudioContext)();
-    // Resume immediately — works because we're in a user gesture handler
-    actx.resume();
-  } catch(e) {
-    console.warn('AudioContext failed:', e);
-    actx = null;
-  }
+    if(actx){ try{actx.close();}catch(e){} actx=null; }
+    actx = new (window.AudioContext||window.webkitAudioContext)();
+    actx.resume();  // succeeds because we're inside a real click event
+  } catch(e){ actx=null; console.warn('AudioContext:',e); }
 
-  document.getElementById('btn-join').disabled = true;
-  setStat('busy', 'Fetching room...');
-  showEmpty('Fetching room from server...');
+  document.getElementById('btn-join').disabled=true;
+  setStat('busy','Connecting to relay...');
+  showEmpty('Connecting...');
 
-  var offerThing  = 'ym-o-' + code;
-  var answerThing = 'ym-a-' + code;
-
-  dweetRead(offerThing)
-    .then(function(data) {
-      if (!data || !data.type || data.type !== 'offer') {
-        throw new Error('No camera found for code ' + code + ' — is camera running?');
-      }
-      if (Date.now() - data.ts > 300000) {
-        throw new Error('Room code expired — ask camera to restart');
-      }
-      // Got a valid offer
-      return setupViewerPC(data, answerThing);
-    })
-    .catch(function(err) {
-      document.getElementById('btn-join').disabled = false;
-      setStat('', 'Offline');
-      showEmpty('Type the room code above and tap Connect');
-      toast(err.message, 'err');
-    });
+  mqConnect(function(){ setupViewerPC(code); });
 }
 
-function setupViewerPC(offerData, answerThing) {
-  if (pc) { try { pc.close(); } catch(e){} pc = null; }
+function setupViewerPC(code) {
+  if(pc){ try{pc.close();}catch(e){} pc=null; }
   stopDetect();
 
-  pc = new RTCPeerConnection(ICE);
-  var gotTrack = false;
+  var offerTopic  = code+'/offer';
+  var answerTopic = code+'/answer';
 
-  pc.ontrack = function(evt) {
-    var s = (evt.streams && evt.streams[0]) ? evt.streams[0] : new MediaStream([evt.track]);
-    feed.srcObject = s;
-    feed.muted = false;
-    var p = feed.play(); if (p) p.catch(function(){});
+  pc = new RTCPeerConnection(ICE);
+  var gotTrack=false;
+
+  pc.ontrack=function(evt){
+    var s=(evt.streams&&evt.streams[0])?evt.streams[0]:new MediaStream([evt.track]);
+    feed.srcObject=s; feed.muted=false;
+    var p=feed.play(); if(p) p.catch(function(){});
     hideEmpty();
-    livebadge.style.display = 'flex';
-    setStat('watch', 'Watching');
-    if (!gotTrack) {
-      gotTrack = true;
+    livebadge.style.display='flex';
+    setStat('watch','Watching');
+    if(!gotTrack){
+      gotTrack=true;
       document.getElementById('connect-panel').classList.remove('show');
-      toast('Live feed connected!', 'ok');
-      // actx was created in joinRoom() button tap — now connect stream to it
+      toast('Live feed connected!','ok');
+      // actx is already running (created in button tap above)
       startDetect(s);
     }
   };
 
-  pc.onconnectionstatechange = function() {
-    if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-      feed.srcObject = null;
+  pc.onconnectionstatechange=function(){
+    if(pc.connectionState==='disconnected'||pc.connectionState==='failed'){
+      feed.srcObject=null;
       showEmpty('Camera disconnected');
-      livebadge.style.display = 'none';
-      setStat('', 'Disconnected');
+      livebadge.style.display='none';
+      setStat('','Disconnected');
       stopDetect();
-      toast('Camera feed ended', 'err');
+      toast('Camera feed ended','err');
     }
   };
 
-  return pc.setRemoteDescription(new RTCSessionDescription({ type: offerData.type, sdp: offerData.sdp }))
-    .then(function() { return pc.createAnswer(); })
-    .then(function(answer) { return pc.setLocalDescription(answer); })
-    .then(function() {
-      setStat('busy', 'Finalizing connection...');
-      return waitForICE(pc);
-    })
-    .then(function() {
-      var answerPayload = {
-        type: pc.localDescription.type,
-        sdp:  pc.localDescription.sdp,
-        ts:   Date.now()
-      };
-      return dweetWrite(answerThing, answerPayload);
-    })
-    .then(function() {
-      setStat('busy', 'Waiting for video...');
-      showEmpty('Connecting... video will appear shortly');
-      document.getElementById('btn-join').disabled = false;
-    });
+  // Subscribe to offer topic — retained message arrives immediately
+  setStat('busy','Waiting for camera offer...');
+  mqListen(offerTopic, function(offerData){
+    if(!pc||pc.signalingState!=='stable') return; // only process once
+
+    showEmpty('Offer received — connecting...');
+    pc.setRemoteDescription(new RTCSessionDescription(offerData))
+      .then(function(){ return pc.createAnswer(); })
+      .then(function(a){ return pc.setLocalDescription(a); })
+      .then(function(){
+        setStat('busy','Finalizing...');
+        return waitForICE(pc);
+      })
+      .then(function(){
+        mqSend(answerTopic, {type:pc.localDescription.type, sdp:pc.localDescription.sdp});
+        setStat('busy','Waiting for video...');
+        showEmpty('Connected — video starting...');
+        document.getElementById('btn-join').disabled=false;
+      })
+      .catch(function(e){
+        document.getElementById('btn-join').disabled=false;
+        setStat('','Offline');
+        showEmpty('Type the room code above and tap Connect');
+        toast('Failed: '+e.message,'err');
+      });
+  });
 }
 
 // ─── STOP ───────────────────────────────────────────────────────────────
 
 function stopAll() {
-  stopPoll();
   stopDetect();
-  if (pc)     { try { pc.close(); } catch(e){} pc = null; }
-  if (stream) { stream.getTracks().forEach(function(t) { t.stop(); }); stream = null; }
-  feed.srcObject = null;
-  feed.muted = true;
-  livebadge.style.display = 'none';
-  bstart.disabled = false;
-  bstart.textContent = 'Start Camera';
-  bstop.disabled = true;
-  setStat('', 'Offline');
-  setAlert('clear');
-  smot.textContent = 'MOTION: —'; smot.classList.remove('hot');
-  ssnd.textContent = 'SOUND: —';  ssnd.classList.remove('hot');
-  roomCode = null;
-  roomCodeEl.textContent = '------';
+  mqStop();
+  if(pc){ try{pc.close();}catch(e){} pc=null; }
+  if(stream){ stream.getTracks().forEach(function(t){t.stop();}); stream=null; }
+  feed.srcObject=null; feed.muted=true;
+  livebadge.style.display='none';
+  bstart.disabled=false; bstart.textContent='Start Camera';
+  bstop.disabled=true;
+  setStat('','Offline'); setAlert('clear');
+  smot.textContent='MOTION: —'; smot.classList.remove('hot');
+  ssnd.textContent='SOUND: —';  ssnd.classList.remove('hot');
+  roomCode=null; roomCodeEl.textContent='------';
   document.getElementById('connect-panel').classList.remove('show');
-  document.getElementById('btn-join').disabled = false;
+  document.getElementById('btn-join').disabled=false;
 }
 
-// ─── DETECTION (viewer side only) ───────────────────────────────────────
+// ─── DETECTION ──────────────────────────────────────────────────────────
 
 function startDetect(s) {
   stopDetect();
 
-  // MOTION — canvas pixel diff, works on any stream, no special permissions
-  mcanvas.width  = 160;
-  mcanvas.height = 120;
-  mctx = mcanvas.getContext('2d', { willReadFrequently: true });
-  prev = null;
+  // MOTION — canvas pixel diff, works on any stream
+  mcanvas.width=160; mcanvas.height=120;
+  mctx=mcanvas.getContext('2d',{willReadFrequently:true});
+  prev=null;
   motionLoop();
 
-  // SOUND — uses actx created inside joinRoom() button tap
-  // actx.state should be 'running' already since it was resumed in the gesture
-  if (actx) {
+  // SOUND — plug stream into actx that was created in joinRoom() click handler
+  if(actx) {
     try {
-      var audioTracks = s.getAudioTracks();
-      if (audioTracks.length > 0) {
-        var src = actx.createMediaStreamSource(new MediaStream([audioTracks[0]]));
-        analyser = actx.createAnalyser();
-        analyser.fftSize = 512;
+      var tracks=s.getAudioTracks();
+      if(tracks.length>0) {
+        var src=actx.createMediaStreamSource(new MediaStream([tracks[0]]));
+        analyser=actx.createAnalyser();
+        analyser.fftSize=512;
         src.connect(analyser);
         soundLoop();
-        toast('Sound detection active', 'ok');
       } else {
-        toast('No audio track — sound alerts off', '');
+        ssnd.textContent='SOUND: no audio';
       }
     } catch(e) {
-      console.warn('Sound detect failed:', e);
-      toast('Sound detect error: ' + e.message, 'err');
+      console.warn('Sound detect error:',e);
+      ssnd.textContent='SOUND: error';
     }
   } else {
-    toast('Sound alerts unavailable', '');
+    ssnd.textContent='SOUND: unavailable';
   }
 }
 
 function stopDetect() {
-  if (floop)    { cancelAnimationFrame(floop); floop = null; }
-  if (analyser) { analyser = null; }
-  if (actx)     { try { actx.close(); } catch(e){} actx = null; }
-  prev = null;
+  if(floop){ cancelAnimationFrame(floop); floop=null; }
+  if(analyser){ analyser=null; }
+  if(actx){ try{actx.close();}catch(e){} actx=null; }
+  prev=null;
 }
 
 function motionLoop() {
-  if (!feed.srcObject) {
-    floop = requestAnimationFrame(function() { setTimeout(motionLoop, 300); });
+  if(!feed.srcObject){
+    floop=requestAnimationFrame(function(){ setTimeout(motionLoop,300); });
     return;
   }
-  floop = requestAnimationFrame(function() { setTimeout(motionLoop, 120); });
-  if (feed.readyState < 2) return;
-  try { mctx.drawImage(feed, 0, 0, 160, 120); } catch(e) { return; }
-  var cur = mctx.getImageData(0, 0, 160, 120);
-  if (prev) {
-    var d1 = prev.data, d2 = cur.data, n = 0;
-    var thr = 28 * (1 - (sens - 1) / 12);
-    for (var i = 0; i < d1.length; i += 4)
-      if ((Math.abs(d1[i]-d2[i]) + Math.abs(d1[i+1]-d2[i+1]) + Math.abs(d1[i+2]-d2[i+2])) / 3 > thr) n++;
-    var ratio = n / (d1.length / 4);
-    var lvl = Math.min(100, Math.round(ratio * 4500));
-    smot.textContent = 'MOTION: ' + lvl + '%';
-    smot.classList.toggle('hot', lvl > 25);
-    var now = Date.now();
-    if (ratio > 0.012 * (1 - (sens-1)/14) && now - tLM > 2500) {
-      tLM = now; fireAlert('motion', 'Motion Detected');
+  floop=requestAnimationFrame(function(){ setTimeout(motionLoop,120); });
+  if(feed.readyState<2) return;
+  try { mctx.drawImage(feed,0,0,160,120); } catch(e){ return; }
+  var cur=mctx.getImageData(0,0,160,120);
+  if(prev){
+    var d1=prev.data, d2=cur.data, n=0;
+    var thr=28*(1-(sens-1)/12);
+    for(var i=0;i<d1.length;i+=4)
+      if((Math.abs(d1[i]-d2[i])+Math.abs(d1[i+1]-d2[i+1])+Math.abs(d1[i+2]-d2[i+2]))/3>thr) n++;
+    var ratio=n/(d1.length/4);
+    var lvl=Math.min(100,Math.round(ratio*4500));
+    smot.textContent='MOTION: '+lvl+'%';
+    smot.classList.toggle('hot',lvl>25);
+    var now=Date.now();
+    if(ratio>0.012*(1-(sens-1)/14) && now-tLM>2500){
+      tLM=now; fireAlert('motion','Motion Detected');
     }
   }
-  prev = cur;
+  prev=cur;
 }
 
 function soundLoop() {
-  if (!actx || !analyser) return;
+  if(!actx||!analyser) return;
   requestAnimationFrame(soundLoop);
-  var data = new Uint8Array(analyser.frequencyBinCount);
+  var data=new Uint8Array(analyser.frequencyBinCount);
   analyser.getByteFrequencyData(data);
-  var sum = 0;
-  for (var i = 0; i < data.length; i++) sum += data[i];
-  var avg = sum / data.length / 255;
-  var lvl = Math.min(100, Math.round(avg * 500));
-  ssnd.textContent = 'SOUND: ' + lvl + '%';
-  ssnd.classList.toggle('hot', lvl > 30);
-  var now = Date.now();
-  if (avg > 0.10 * (1 - (sens-1)/13) && now - tLS > 2000) {
-    tLS = now; fireAlert('sound', 'Sound Detected');
+  var sum=0;
+  for(var i=0;i<data.length;i++) sum+=data[i];
+  var avg=sum/data.length/255;
+  var lvl=Math.min(100,Math.round(avg*500));
+  ssnd.textContent='SOUND: '+lvl+'%';
+  ssnd.classList.toggle('hot',lvl>30);
+  var now=Date.now();
+  if(avg>0.10*(1-(sens-1)/13) && now-tLS>2000){
+    tLS=now; fireAlert('sound','Sound Detected');
   }
 }
 
-function fireAlert(type, msg) {
-  setAlert(type, msg);
-  toast(msg, type === 'sound' ? 'err' : '');
+function fireAlert(type,msg){
+  setAlert(type,msg);
+  toast(msg, type==='sound'?'err':'');
 }
 
 setRole('camera');
